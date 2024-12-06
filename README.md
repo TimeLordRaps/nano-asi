@@ -1,8 +1,6 @@
 # 🧠 NanoASI: Advanced Recursive Self-Improving AI Framework
 
-[![PyPI version](https://badge.fury.io/py/nano-asi.svg)](https://badge.fury.io/py/nano-asi)
-[![Documentation Status](https://readthedocs.org/projects/nano-asi/badge/?version=latest)](https://nano-asi.readthedocs.io/en/latest/?badge=latest)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPL3.0-yellow.svg)](https://github.com/TimeLordRaps/nano-asi/blob/main/LICENSE)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
 NanoASI is a user-friendly framework for building recursive self-improving AI systems. It combines advanced MCTS (Monte Carlo Tree Search), consciousness flow tracking, and parallel universe exploration with an emphasis on accessibility and ease of use.
@@ -32,6 +30,29 @@ from nano_asi import ASI
 asi = ASI()
 result = await asi.run("Generate an innovative solution for climate change")
 print(result.solution)
+```
+
+### Google Colab Usage
+
+Run nano-asi directly in Google Colab:
+
+```python
+# Run setup script
+!wget https://raw.githubusercontent.com/nanoasi/nano-asi/main/colab_setup.py
+!python colab_setup.py
+
+# Now you can use nano-asi
+from nano_asi import ASI
+import asyncio
+import nest_asyncio
+nest_asyncio.apply()
+
+async def main():
+    asi = ASI()
+    result = await asi.run("Your task here")
+    print(result.solution)
+
+asyncio.run(main())
 ```
 
 ### Advanced Usage
@@ -121,7 +142,7 @@ We welcome contributions! See our [Contributing Guide](CONTRIBUTING.md) for deta
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) for details.
+GPL-3.0 License - see [LICENSE](https://github.com/TimeLordRaps/nano-asi/blob/main/LICENSE) for details.
 
 ## 🌟 Star History
 
@@ -129,6 +150,4 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## 📫 Contact
 
-- 📧 Email: team@nanoasi.org
-- 💬 Discord: [Join our community](https://discord.gg/nanoasi)
-- 🐦 Twitter: [@NanoASI](https://twitter.com/NanoASI)
+🐦 Twitter/X: [@TimeLordRaps](https://x.com/TimeLordRaps)

@@ -124,7 +124,7 @@ line-length = 100
 target-version = "py38"
 
 [project.urls]
-Homepage = "https://github.com/nanoasi/nano-asi"
-Documentation = "https://nanoasi.readthedocs.io"
-Repository = "https://github.com/nanoasi/nano-asi.git"
-Changelog = "https://github.com/nanoasi/nano-asi/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/TimeLordRaps/nano-asi"
+Documentation = "https://github.com/TimeLordRaps/nano-asi/wiki"
+Repository = "https://github.com/TimeLordRaps/nano-asi.git"
+Changelog = "https://github.com/TimeLordRaps/nano-asi/blob/main/CHANGELOG.md"
