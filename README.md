@@ -1,3 +1,5 @@
+# WIP: Will be an open-webui aider unsloth recursive self-improvement framework.
+
 # 🧠 NanoASI: Advanced Recursive Self-Improving AI Framework
 
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL3.0-yellow.svg)](https://github.com/TimeLordRaps/nano-asi/blob/main/LICENSE)
