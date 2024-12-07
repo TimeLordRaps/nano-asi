@@ -117,10 +117,10 @@ launch_ui()
 
 ## 📚 Documentation
 
-- [Quick Start Guide](https://nano-asi.readthedocs.io/en/latest/quickstart.html)
-- [Tutorial Notebooks](https://nano-asi.readthedocs.io/en/latest/tutorials/index.html)
-- [API Reference](https://nano-asi.readthedocs.io/en/latest/api/index.html)
-- [Advanced Topics](https://nano-asi.readthedocs.io/en/latest/advanced/index.html)
+- [Quick Start Guide](https://github.com/TimeLordRaps/nano-asi/wiki/Quickstart)
+- [Tutorial Notebooks](https://github.com/TimeLordRaps/nano-asi/wiki/Tutorials)
+- [API Reference](https://github.com/TimeLordRaps/nano-asi/wiki/API)
+- [Advanced Topics](https://github.com/TimeLordRaps/nano-asi/wiki/Advanced)
 
 ## 🛠️ Development
 

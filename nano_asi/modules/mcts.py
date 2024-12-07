@@ -220,8 +220,28 @@ class MCTSEngine:
     
     def _default_simulation(self, node: MCTSNode) -> float:
         """Perform default random simulation."""
-        # Add default simulation logic
-        return 0.0
+        # Implement rollout policy
+        current_state = node.state.copy()
+        depth = 0
+        total_reward = 0.0
+        
+        while depth < self.config.max_depth and not self._is_terminal(current_state):
+            # Select random action
+            actions = self._get_valid_actions(current_state)
+            if not actions:
+                break
+                
+            action = random.choice(actions)
+            
+            # Apply action and get reward
+            next_state = self._apply_action(current_state, action)
+            reward = self._get_reward(next_state)
+            
+            total_reward += reward
+            current_state = next_state
+            depth += 1
+        
+        return total_reward / (depth + 1)
     
     def _backpropagate(self, node: MCTSNode, value: float):
         """Backpropagate value through tree."""
@@ -244,6 +264,21 @@ class MCTSEngine:
         
         return actions[best_idx], float(values[best_idx])
     
+    async def evaluate(self, solution: str) -> float:
+        """Evaluate a solution using MCTS-based analysis."""
+        root_state = {'solution': solution}
+        root = MCTSNode(state=root_state)
+        
+        # Perform focused evaluation rollouts
+        for _ in range(self.config.max_rollouts // 2):
+            value = await self._simulate(root, None)
+            self._backpropagate(root, value)
+        
+        # Calculate final score
+        if root.visits > 0:
+            return root.value / root.visits
+        return 0.0
+
     def visualize(self, root: MCTSNode, filename: str = "mcts_tree.png"):
         """Generate visual representation of MCTS tree."""
         UniqueDotExporter(

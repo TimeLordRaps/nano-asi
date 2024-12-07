@@ -6,6 +6,7 @@ from .mcts import MCTSEngine
 from .judgment import JudgmentSystem
 from .universe import UniverseExplorer
 from .synthetic import SyntheticDataGenerator
+from .graph_rag import GraphRAGModule
 
 __all__ = [
     "ConsciousnessTracker",
@@ -13,5 +14,6 @@ __all__ = [
     "MCTSEngine",
     "JudgmentSystem",
     "UniverseExplorer",
-    "SyntheticDataGenerator"
+    "SyntheticDataGenerator",
+    "GraphRAGModule"
 ]
