@@ -6,7 +6,7 @@ NanoASI is a cutting-edge framework for building recursive self-improving AI sys
 
 - [Quickstart](Quickstart/Installation)
 - [Core Architecture](Core_Architecture/Overview)
-- [Components](Components/ASI/Overview)
+- [Components](Components/Overview)
 - [Advanced Topics](Advanced_Topics/QuantumInspiredComputing)
 - [API Reference](API_Reference/Interfaces)
 - [Development](Development/ContributingGuidelines)
