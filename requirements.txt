@@ -1,0 +1,60 @@
+# =============================================
+# Core Dependencies
+# =============================================
+
+# Uvicorn for ASGI server with standard extras
+uvicorn[standard]>=0.22.0
+
+# FastAPI for building APIs (assuming Open WebUI or Pipelines use it)
+fastapi>=0.95.0
+
+# PyTorch and related libraries
+# Typically installed via Conda for better CUDA support, but included here for pip-based installations
+torch>=2.0.0
+torchvision>=0.15.0
+torchaudio>=0.14.0
+
+# =============================================
+# Agentic Training Platform Dependencies
+# =============================================
+
+# Unsloth for enhanced functionalities, install from GitHub
+unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git@main
+
+# TRL (Transformer Reinforcement Learning)
+trl>=0.8.0,<1.0.0
+
+# PEFT for Parameter-Efficient Fine-Tuning
+peft>=0.4.0
+
+# Accelerate for distributed training
+accelerate>=0.21.0
+
+# BitsAndBytes for 8-bit optimizers and quantization
+bitsandbytes>=0.39.0
+
+# Additional specialized libraries
+nano-graphrag>=1.0.0
+distilabel>=0.1.5
+langgraph>=0.2.3
+mergekit>=0.3.1
+aider>=0.4.2
+
+# =============================================
+# Optional Dependencies
+# =============================================
+
+# Add any additional libraries your platform requires below
+# Example:
+# numpy>=1.24.0
+# pandas>=2.0.0
+# scikit-learn>=1.2.0
+
+# =============================================
+# Development Dependencies
+# =============================================
+
+# Tools for development and testing
+black>=23.0.0
+flake8>=6.0.0
+pytest>=7.0.0
