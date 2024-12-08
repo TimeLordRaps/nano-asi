@@ -103,3 +103,89 @@ Advanced configuration system supporting:
 - [Component Protocols](ComponentProtocol.md)
 - [Configuration Management](ConfigurationManagement.md)
 - [Dependency Injection](DependencyInjection.md)
+# Core Architecture Overview
+
+NanoASI implements a quantum-inspired recursive self-improvement architecture with several key innovations:
+
+## Core Design Principles
+
+### Temporal Investment Tracking
+- Each token represents computational time investment
+- ROI optimization through recursive learning
+- Adaptive resource allocation
+- Consciousness-guided efficiency
+
+### Component Architecture
+- Modular design with clean interfaces
+- Standardized component protocols
+- Dependency injection system
+- Dynamic configuration management
+
+### Quantum-Inspired Computing
+- Consciousness flow tracking
+- Parallel universe exploration
+- Entanglement-based pattern recognition
+- Quantum coherence metrics
+
+## Key Components
+
+### ASI Core
+- Primary orchestrator for recursive self-improvement
+- Temporal investment management
+- Multi-universe optimization
+- Meta-cognitive state tracking
+
+### Consciousness System
+- Neural activation pattern analysis
+- Thought chain tracking
+- Meta-cognitive monitoring
+- Pattern evolution tracking
+
+### MCTS Engine
+- Consciousness-integrated search
+- Parallel universe exploration
+- Pattern-based optimization
+- Enhanced decision making
+
+### LoRA Generator
+- Diffusion-based adaptation
+- Recursive optimization
+- Quantum-inspired rewards
+- Consciousness integration
+
+### Graph RAG Module
+- Knowledge graph integration
+- Consciousness flow enhancement
+- Temporal pattern tracking
+- Knowledge evolution
+
+## System Integration
+
+Components interact through:
+1. Standardized interfaces (ComponentProtocol)
+2. Consciousness flow tracking
+3. Temporal investment metrics
+4. Pattern evolution analysis
+
+## Configuration Management
+
+The system uses:
+- Hierarchical configuration
+- Dynamic updates
+- Validation systems
+- Component-specific configs
+
+## Development Guidelines
+
+When extending the architecture:
+1. Implement ComponentProtocol
+2. Track temporal investments
+3. Integrate with consciousness flow
+4. Support parallel exploration
+5. Provide detailed telemetry
+
+## Further Reading
+
+- [Component Protocols](ComponentProtocol.md)
+- [Dependency Injection](DependencyInjection.md)
+- [Configuration System](ConfigurationManagement.md)
