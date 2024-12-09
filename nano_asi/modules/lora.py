@@ -449,6 +449,10 @@ class LoRAGenerator(nn.Module):
                 } for _ in range(3)
             ]
         
+        # Ensure activation_patterns is a list of dictionaries
+        if not isinstance(flow_data['activation_patterns'], list):
+            flow_data['activation_patterns'] = [flow_data['activation_patterns']]
+        
         # Track pattern evolution
         self.pattern_evolution_history.append({
             'timestamp': time.time(),

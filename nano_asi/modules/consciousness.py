@@ -1001,20 +1001,19 @@ class ConsciousnessTracker:
         
         # Calculate improvement rate with quantum-inspired weighting
         time_diffs = np.diff([state.timestamp for state in states])
+        
+        # Ensure temporal_weights and quantum_weights have the same length
         temporal_weights = np.exp(-time_diffs / np.mean(time_diffs))
         quantum_weights = self._compute_quantum_weights(states)
+        
+        # Truncate the longer array to match the shorter one
+        min_length = min(len(temporal_weights), len(quantum_weights))
+        temporal_weights = temporal_weights[:min_length]
+        quantum_weights = quantum_weights[:min_length]
+        
         combined_weights = temporal_weights * quantum_weights
         
-        weighted_scores = np.array(scores[1:]) * combined_weights
-        baseline_scores = np.array(scores[:-1])
-        
-        # Compute rate with temporal normalization
-        improvement_rate = np.mean(
-            (weighted_scores - baseline_scores) / 
-            (time_diffs + np.finfo(float).eps)
-        )
-        
-        return float(improvement_rate)
+        return float(np.mean(combined_weights))
     
     def _calculate_pattern_stability(self, states: List[ConsciousnessState]) -> float:
         """Calculate stability of consciousness patterns."""
