@@ -461,16 +461,18 @@ class LoRAGenerator(nn.Module):
         # Explicitly add activation_patterns to flow_data
         flow_data['activation_patterns'] = activation_patterns
         
-        # Always add quantum_resonance, using hyperparameters if available
+        # Always add quantum_resonance
+        # Try to use lora_r from hyperparameters, otherwise use a default of 64
         lora_r = flow_data.get('hyperparameters', {}).get('lora_r', 64)
         quantum_resonance = torch.rand(lora_r).tolist()
         flow_data['quantum_resonance'] = quantum_resonance
         
         # Track pattern evolution
-        self.pattern_evolution_history.append({
-            'timestamp': time.time(),
-            'flow_data': flow_data
-        })
+        if hasattr(self, 'pattern_evolution_history'):
+            self.pattern_evolution_history.append({
+                'timestamp': time.time(),
+                'flow_data': flow_data
+            })
         
         return flow_data
 
