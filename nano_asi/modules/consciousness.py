@@ -744,6 +744,31 @@ class ConsciousnessTracker:
         except Exception:
             return 0.0
 
+    def _compute_meta_cognitive_score(self, state: ConsciousnessState) -> float:
+        """Compute meta-cognitive score for a consciousness state."""
+        try:
+            # Compute score based on meta insights and thought chains
+            meta_insight_complexity = len(state.meta_insights)
+            thought_chain_complexity = len(state.thought_chains)
+            
+            # Quantum metrics contribution
+            quantum_contribution = (
+                state.quantum_metrics.get('coherence', 0.0) +
+                state.quantum_metrics.get('entanglement', 0.0) +
+                state.quantum_metrics.get('superposition', 0.0)
+            ) / 3.0
+            
+            # Compute composite meta-cognitive score
+            meta_score = (
+                meta_insight_complexity * 0.4 +
+                thought_chain_complexity * 0.4 +
+                quantum_contribution * 0.2
+            )
+            
+            return float(meta_score)
+        except Exception:
+            return 0.0
+
     def _analyze_pattern_evolution(self) -> Dict[str, Any]:
         """
         Analyze pattern evolution with quantum-inspired metrics and temporal coherence.
