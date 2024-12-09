@@ -9,7 +9,6 @@ import uuid
 import json
 import os
 import networkx as nx
-import rdflib
 from nano_graphrag import GraphRAG, QueryParam
 
 class JudgmentCriteria(Enum):
@@ -47,7 +46,6 @@ class GraphRAGIntegration:
     
     def __init__(self, graph_db_path: str = './judgment_graph_db'):
         self.graph = nx.DiGraph()
-        self.rdf_graph = rdflib.Graph()
         self.graph_db_path = graph_db_path
         os.makedirs(graph_db_path, exist_ok=True)
     
@@ -68,22 +66,6 @@ class GraphRAGIntegration:
             'judgment_id': judgment.id
         })
         
-        # Create RDF triples for semantic representation
-        inference_uri = rdflib.URIRef(f'http://nano-asi.org/inference/{node_id}')
-        self.rdf_graph.add((
-            inference_uri, 
-            rdflib.RDF.type, 
-            rdflib.URIRef('http://nano-asi.org/ontology/Inference')
-        ))
-        
-        # Add judgment-related triples
-        for criteria, score in judgment.scores.items():
-            self.rdf_graph.add((
-                inference_uri,
-                rdflib.URIRef(f'http://nano-asi.org/ontology/hasScore/{criteria}'),
-                rdflib.Literal(score)
-            ))
-        
         return node_id
     
     def link_inferences(
@@ -94,37 +76,16 @@ class GraphRAGIntegration:
     ):
         """Create a link between two inference nodes."""
         self.graph.add_edge(inference1_node, inference2_node, type=relationship_type)
-        
-        # Create RDF triples for the relationship
-        inference1_uri = rdflib.URIRef(f'http://nano-asi.org/inference/{inference1_node}')
-        inference2_uri = rdflib.URIRef(f'http://nano-asi.org/inference/{inference2_node}')
-        relationship_uri = rdflib.URIRef(f'http://nano-asi.org/ontology/relationship/{relationship_type}')
-        
-        self.rdf_graph.add((
-            inference1_uri, 
-            relationship_uri, 
-            inference2_uri
-        ))
     
     def save_graph(self):
         """Save the graph database."""
         # Save NetworkX graph
         nx.write_gpickle(self.graph, os.path.join(self.graph_db_path, 'inference_graph.nx'))
-        
-        # Save RDF graph
-        self.rdf_graph.serialize(
-            destination=os.path.join(self.graph_db_path, 'inference_graph.ttl'), 
-            format='turtle'
-        )
     
     def load_graph(self):
         """Load the graph database."""
         try:
             self.graph = nx.read_gpickle(os.path.join(self.graph_db_path, 'inference_graph.nx'))
-            self.rdf_graph.parse(
-                os.path.join(self.graph_db_path, 'inference_graph.ttl'), 
-                format='turtle'
-            )
         except FileNotFoundError:
             print("No existing graph database found.")
 
