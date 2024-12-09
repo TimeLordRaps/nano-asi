@@ -17,7 +17,7 @@ import time
 from collections import defaultdict
 import scipy.stats
 
-from .interfaces import ComponentConfig
+from nano_asi.core.interfaces import ComponentConfig
 
 from typing import Optional, Dict, Any, List, Union
 from pydantic import BaseModel, Field, validator

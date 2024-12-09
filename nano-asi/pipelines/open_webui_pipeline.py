@@ -21,10 +21,10 @@ from transformers import AutoTokenizer
 from datasets import load_dataset
 from peft import PeftModel, PeftConfig
 
-from ..core.asi import ASI
-from ..modules.graph_rag import GraphRAGModule
-from ..modules.mcts import MCTSEngine
-from ..modules.consciousness import ConsciousnessTracker
+from nano_asi.core.asi import ASI
+from nano_asi.modules.graph_rag import GraphRAGModule
+from nano_asi.modules.mcts import MCTSEngine
+from nano_asi.modules.consciousness import ConsciousnessTracker
 
 class OpenWebUIPipeline:
     """Advanced pipeline for web UI interactions with recursive improvement."""

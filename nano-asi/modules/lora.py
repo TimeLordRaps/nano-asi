@@ -12,7 +12,7 @@ import uuid
 from collections import defaultdict
 
 # Import MAX_SEQ_LENGTH from core configuration
-from ..core.config import Config
+from nano_asi.core.config import Config
 
 # Use the default max sequence length from the configuration
 MAX_SEQ_LENGTH = Config().model_config.get('max_seq_length', 128000)
