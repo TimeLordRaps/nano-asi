@@ -467,12 +467,18 @@ class LoRAGenerator(nn.Module):
         quantum_resonance = torch.rand(lora_r).tolist()
         flow_data['quantum_resonance'] = quantum_resonance
         
-        # Track pattern evolution
-        if hasattr(self, 'pattern_evolution_history'):
+        # Track pattern evolution if possible
+        try:
+            if not hasattr(self, 'pattern_evolution_history'):
+                self.pattern_evolution_history = []
+            
             self.pattern_evolution_history.append({
                 'timestamp': time.time(),
                 'flow_data': flow_data
             })
+        except Exception:
+            # Fallback if tracking is not possible
+            pass
         
         return flow_data
 
