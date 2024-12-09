@@ -325,15 +325,12 @@ class LoRAGenerator(nn.Module):
         if conditional_tokens is None:
             raise ValueError("Conditional tokens must be provided")
         
-        if len(conditional_tokens) == 0:
-            raise ValueError("Conditional tokens cannot be empty")
-            
-        # Generate base parameters with correct shapes
+        # Ensure params have correct shapes
         params = {
-            'lora_r': torch.randn(self.config.lora_r, self.config.lora_r),
-            'lora_alpha': torch.tensor(self.config.lora_alpha, dtype=torch.float32),
-            'lora_dropout': torch.tensor(self.config.lora_dropout, dtype=torch.float32),
-            'weight_matrix': torch.randn(self.config.lora_r, self.config.output_dim)
+            'lora_r': torch.randn(self.hyperparameters['lora_r'], self.hyperparameters['lora_r']),
+            'lora_alpha': torch.tensor(self.hyperparameters['lora_alpha'], dtype=torch.float32),
+            'lora_dropout': torch.tensor(self.hyperparameters['lora_dropout'], dtype=torch.float32),
+            'weight_matrix': torch.randn(self.hyperparameters['lora_r'], self.config.output_dim)
         }
         
         # Track consciousness flow if tracker is provided
@@ -344,7 +341,7 @@ class LoRAGenerator(nn.Module):
             })
         
         # Generate quantum resonance scores
-        quantum_resonance = torch.rand(self.config.lora_r).tolist()
+        quantum_resonance = torch.rand(self.hyperparameters['lora_r']).tolist()
         
         adapter = {
             'tokens': conditional_tokens,

@@ -451,11 +451,25 @@ class ConsciousnessTracker:
             "temporal_signature": self._compute_temporal_signature(history)
         }
     
-    def _compute_causal_entropy(self, values: torch.Tensor) -> float:
+    def _compute_causal_entropy(self, values: List[ConsciousnessState]) -> float:
         """Compute causal entropy to measure potential for novel patterns."""
-        # Measure of potential for generating new, unexpected patterns
-        variance = torch.var(values)
-        return float(torch.log(variance + 1))
+        try:
+            # Extract coherence values from states
+            coherence_values = [
+                state.quantum_metrics.get('coherence', 0.0) 
+                for state in values
+            ]
+            
+            # Convert to tensor
+            coherence_tensor = torch.tensor(coherence_values, dtype=torch.float32)
+            
+            # Compute variance
+            variance = torch.var(coherence_tensor)
+            
+            # Measure of potential for generating new, unexpected patterns
+            return float(torch.log(variance + 1))
+        except Exception:
+            return 0.0
     
     def _compute_information_flow(self, grads: torch.Tensor) -> float:
         """Compute information flow through gradient dynamics."""
