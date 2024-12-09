@@ -121,6 +121,23 @@ class ConsciousnessTracker:
                 }
                 chains.append(chain)
         return chains
+
+    def _compute_quantum_stats(self, activation: Dict[str, Any]) -> Dict[str, Any]:
+        """Compute quantum-inspired statistics for neural activations."""
+        if 'values' not in activation:
+            return {}
+        
+        values = torch.tensor(activation['values']) if not isinstance(activation['values'], torch.Tensor) else activation['values']
+        
+        quantum_stats = {
+            'mean': float(values.mean()),
+            'std': float(values.std()),
+            'quantum_entropy': float(self._compute_quantum_entropy(values)),
+            'coherence': float(torch.norm(values) / (values.numel() + 1e-10)),
+            'superposition_potential': float(torch.abs(values).mean())
+        }
+        
+        return quantum_stats
     
     async def _analyze_meta_patterns(self, state_data: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Analyze meta-level patterns and insights."""
