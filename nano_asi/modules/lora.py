@@ -473,13 +473,6 @@ class LoRAGenerator(nn.Module):
         improved_adapter['metadata']['recursive_improvement'] = True
         
         return improved_adapter
-                'params_change': {
-                    'lora_r': torch.randn(self.config.lora_r, self.config.lora_r)  # Generate new tensor directly
-                }
-            }
-        ]
-        
-        # Mark as recursively improved
         improved_adapter['metadata']['recursive_improvement'] = True
         
         return improved_adapter
