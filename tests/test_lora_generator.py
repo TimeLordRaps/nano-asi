@@ -6,7 +6,7 @@ import numpy as np
 from typing import Dict, Any, List, Tuple
 from collections import defaultdict
 
-from nano-asi.modules import LoRAGenerator
+from nano_asi.modules import LoRAGenerator
 
 @pytest.mark.asyncio
 async def test_lora_generator_initialization(lora_generator):

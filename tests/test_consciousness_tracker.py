@@ -5,7 +5,7 @@ import torch
 import numpy as np
 from typing import Dict, Any
 
-from nano-asi.modules import ConsciousnessTracker
+from nano_asi.modules import ConsciousnessTracker
 
 @pytest.mark.asyncio
 async def test_consciousness_tracker_initialization(consciousness_tracker):
