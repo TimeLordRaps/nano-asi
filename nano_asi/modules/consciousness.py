@@ -744,6 +744,32 @@ class ConsciousnessTracker:
         except Exception:
             return 0.0
 
+    def _compute_dynamic_weights(self, state: ConsciousnessState) -> Dict[str, float]:
+        """Compute dynamic weights for improvement rate calculation."""
+        # Default weights with quantum-inspired adaptivity
+        default_weights = {
+            'base': 0.2,
+            'quantum': 0.2,
+            'temporal': 0.2,
+            'info': 0.2,
+            'meta': 0.1,
+            'universe': 0.1
+        }
+        
+        # Adjust weights based on state characteristics
+        if state.meta_insights:
+            default_weights['meta'] += 0.1
+        
+        if state.quantum_metrics.get('coherence', 0.0) > 0.5:
+            default_weights['quantum'] += 0.1
+        
+        if state.temporal_coherence > 0.5:
+            default_weights['temporal'] += 0.1
+        
+        # Normalize weights to ensure they sum to 1
+        total = sum(default_weights.values())
+        return {k: v/total for k, v in default_weights.items()}
+
     def _compute_meta_cognitive_score(self, state: ConsciousnessState) -> float:
         """Compute meta-cognitive score for a consciousness state."""
         try:

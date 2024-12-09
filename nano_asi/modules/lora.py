@@ -706,6 +706,20 @@ class LoRAGenerator(nn.Module):
             }
         ]
         
+        # Ensure consciousness_states is present
+        if 'consciousness_states' not in flow_data:
+            flow_data['consciousness_states'] = [
+                {
+                    'universe_id': str(uuid.uuid4()),
+                    'activation_patterns': np.random.random((1, 10)).tolist(),
+                    'quantum_metrics': {
+                        'coherence': np.random.random(),
+                        'entanglement': np.random.random(),
+                        'superposition': np.random.random()
+                    }
+                } for _ in range(3)  # Generate 3 random consciousness states
+            ]
+        
         # Track pattern evolution
         self.pattern_evolution_history.append({
             'timestamp': time.time(),
