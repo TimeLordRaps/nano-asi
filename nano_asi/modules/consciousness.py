@@ -632,6 +632,33 @@ class ConsciousnessTracker:
         except Exception:
             return 0.0
 
+    def _compute_emergence_potential(self, states: List[ConsciousnessState]) -> float:
+        """Compute emergence potential across consciousness states."""
+        try:
+            # Compute complexity and novelty metrics
+            complexity_scores = [
+                len(state.meta_insights) + len(state.thought_chains)
+                for state in states
+            ]
+            
+            # Compute variance as emergence potential
+            return float(np.var(complexity_scores)) if len(complexity_scores) > 1 else 0.0
+        except Exception:
+            return 0.0
+
+    def _compute_information_density(self, states: List[ConsciousnessState]) -> float:
+        """Compute information density across consciousness states."""
+        try:
+            # Compute information density based on meta insights and thought chains
+            info_scores = [
+                len(state.meta_insights) * len(state.thought_chains)
+                for state in states
+            ]
+            
+            return float(np.mean(info_scores)) if info_scores else 0.0
+        except Exception:
+            return 0.0
+
     def _analyze_pattern_evolution(self) -> Dict[str, Any]:
         """
         Analyze pattern evolution with quantum-inspired metrics and temporal coherence.

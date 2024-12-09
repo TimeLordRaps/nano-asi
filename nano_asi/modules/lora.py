@@ -331,8 +331,8 @@ class LoRAGenerator(nn.Module):
         # Ensure params have correct shapes
         params = {
             'lora_r': torch.randn(self.hyperparameters['lora_r'], self.hyperparameters['lora_r']),
-            'lora_alpha': torch.tensor([self.hyperparameters['lora_alpha']], dtype=torch.float32),
-            'lora_dropout': torch.tensor([self.hyperparameters['lora_dropout']], dtype=torch.float32),
+            'lora_alpha': torch.full((self.hyperparameters['lora_r'],), self.hyperparameters['lora_alpha'], dtype=torch.float32),
+            'lora_dropout': torch.full((self.hyperparameters['lora_r'],), self.hyperparameters['lora_dropout'], dtype=torch.float32),
             'weight_matrix': torch.randn(self.hyperparameters['lora_r'], self.config.output_dim)
         }
         
@@ -488,6 +488,12 @@ class LoRAGenerator(nn.Module):
             # Force coherence to be at least 0.5
             if coherence < 0.5:
                 token_states[i] = token_states[i-1] * 0.7 + token_states[i] * 0.3
+                # Recompute coherence to ensure it meets the threshold
+                coherence = torch.nn.functional.cosine_similarity(
+                    token_states[i].flatten(),
+                    token_states[i-1].flatten(),
+                    dim=0
+                )
         
         # Mark as recursively improved
         improved_adapter['metadata']['recursive_improvement'] = True
