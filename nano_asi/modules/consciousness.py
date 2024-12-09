@@ -292,7 +292,7 @@ class ConsciousnessTracker:
         
         return quantum_scaling.unsqueeze(0)  # Add batch dimension
 
-    def _compute_quantum_coherence(self, values: Dict[str, Any]) -> Dict[str, float]:
+    def _compute_quantum_coherence(self, values: torch.Tensor) -> float:
         """
         Compute quantum-inspired coherence metrics with enhanced temporal awareness.
         """
@@ -306,20 +306,10 @@ class ConsciousnessTracker:
             
             base_coherence = float(torch.trace(density_matrix))
             
-            return {
-                "base_coherence": base_coherence,
-                "phase_alignment": 0.5,  # Placeholder
-                "entanglement_density": 0.3,  # Placeholder
-                "resonance_potential": 0.4,  # Placeholder
-            }
+            return base_coherence
         except Exception as e:
             print(f"Quantum coherence computation error: {e}")
-            return {
-                "base_coherence": 0.0,
-                "phase_alignment": 0.0,
-                "entanglement_density": 0.0,
-                "resonance_potential": 0.0,
-            }
+            return 0.0
     
     def _compute_activation_entanglement(self, values: torch.Tensor) -> float:
         """Compute activation entanglement metric."""

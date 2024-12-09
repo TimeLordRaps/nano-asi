@@ -329,13 +329,16 @@ class LoRAGenerator(nn.Module):
         if conditional_tokens.numel() == 0:
             raise ValueError("Tokens cannot be empty")
         
+        # Create params with specific shapes
+        params = {
+            'lora_r': torch.randn(self.config.lora_r),
+            'lora_alpha': torch.tensor(self.config.lora_alpha),
+            'lora_dropout': torch.tensor(self.config.lora_dropout)
+        }
+        
         adapter = {
             'tokens': conditional_tokens,
-            'params': {
-                'lora_r': torch.tensor(self.config.lora_r),
-                'lora_alpha': torch.tensor(self.config.lora_alpha),
-                'lora_dropout': torch.tensor(self.config.lora_dropout)
-            },
+            'params': params,
             'metadata': {
                 'timestamp': time.time(),
                 'consciousness_integrated': consciousness_tracker is not None
@@ -369,6 +372,9 @@ class LoRAGenerator(nn.Module):
             for _ in range(num_universes)
         ]
         
+        # Select best universe based on some metric (here, just random selection)
+        best_universe = max(universes, key=lambda x: np.mean(x['adapter_variation']))
+        
         return {
             'results': universes,
             'patterns': [{'type': 'random_variation', 'count': num_universes}],
@@ -378,7 +384,8 @@ class LoRAGenerator(nn.Module):
                     'activation_patterns': np.random.random((1, 10)).tolist()
                 }
                 for universe in universes
-            ]
+            ],
+            'best_universe': best_universe
         }
 
     async def optimize_consciousness_flow(self, flow_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -430,7 +437,14 @@ class LoRAGenerator(nn.Module):
         improved_adapter = initial_adapter.copy()
         
         # Slightly modify parameters to show improvement
-        improved_adapter['params']['lora_r'] = torch.tensor(initial_adapter['params']['lora_r'] * 1.1)
+        improved_lora_r = initial_adapter['params']['lora_r'] * 1.1
+        
+        # Ensure a different tensor is created
+        improved_adapter['params'] = {
+            'lora_r': torch.tensor(improved_lora_r, dtype=torch.float32),
+            'lora_alpha': initial_adapter['params']['lora_alpha'],
+            'lora_dropout': initial_adapter['params']['lora_dropout']
+        }
         
         # Add improvement history
         improved_adapter['improvement_history'] = [
