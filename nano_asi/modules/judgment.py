@@ -5,6 +5,9 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 import numpy as np
 import torch
+import uuid
+import json
+import os
 
 class JudgmentCriteria(Enum):
     COHERENCE = auto()
@@ -15,34 +18,47 @@ class JudgmentCriteria(Enum):
 
 @dataclass
 class Judgment:
-    """Represents a detailed, multi-dimensional judgment of an inference."""
-    generation_id: str
-    context: Dict[str, Any]
-    scores: Dict[JudgmentCriteria, float] = field(default_factory=dict)
+    """Comprehensive judgment with self-improving metadata."""
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    generation_id: str = ''
+    context: Dict[str, Any] = field(default_factory=dict)
+    scores: Dict[str, float] = field(default_factory=dict)
     meta_scores: Dict[str, float] = field(default_factory=dict)
     detailed_feedback: Optional[str] = None
+    training_value: float = 0.0
     
-    def compute_total_score(self) -> float:
-        """Compute a weighted total score across all judgment criteria."""
-        weights = {
-            JudgmentCriteria.COHERENCE: 0.25,
-            JudgmentCriteria.CREATIVITY: 0.2,
-            JudgmentCriteria.LOGICAL_CONSISTENCY: 0.2,
-            JudgmentCriteria.NOVELTY: 0.15,
-            JudgmentCriteria.ETHICAL_ALIGNMENT: 0.2
+    def serialize(self) -> Dict[str, Any]:
+        """Convert judgment to a serializable dictionary."""
+        return {
+            'id': self.id,
+            'generation_id': self.generation_id,
+            'context': self.context,
+            'scores': {k.name: v for k, v in self.scores.items()},
+            'meta_scores': self.meta_scores,
+            'detailed_feedback': self.detailed_feedback,
+            'training_value': self.training_value
         }
-        return sum(self.scores.get(criteria, 0) * weights.get(criteria, 0) 
-                   for criteria in JudgmentCriteria)
 
 class JudgmentSystem:
-    """Advanced judgment system for recursive, meta-cognitive evaluation."""
+    """Advanced self-improving judgment system."""
     
     def __init__(self, 
-                 consciousness_tracker=None, 
-                 config: Optional[Dict] = None):
-        self.consciousness_tracker = consciousness_tracker
-        self.config = config or {}
-        self.judgment_history: List[Tuple[Judgment, Judgment]] = []
+                 training_data_dir: str = './judgment_training_data',
+                 max_training_samples: int = 10000):
+        self.training_data_dir = training_data_dir
+        self.max_training_samples = max_training_samples
+        os.makedirs(training_data_dir, exist_ok=True)
+        
+    def _compute_embedding(self, generation: Any) -> torch.Tensor:
+        """Compute a semantic embedding of the generation."""
+        # Placeholder: Replace with actual embedding technique
+        return torch.randn(768)  # Example 768-dim embedding
+    
+    def _compute_semantic_similarity(self, gen1: Any, gen2: Any) -> float:
+        """Compute semantic similarity between two generations."""
+        emb1 = self._compute_embedding(gen1)
+        emb2 = self._compute_embedding(gen2)
+        return torch.cosine_similarity(emb1, emb2, dim=0).item()
     
     def judge_inference(
         self, 
@@ -72,30 +88,42 @@ class JudgmentSystem:
         generation2: Any, 
         context: Dict[str, Any]
     ) -> Tuple[Judgment, Judgment]:
-        """Perform pairwise comparison between two generations."""
+        """Perform advanced pairwise comparison."""
+        # Judge each generation
         judgment1 = self.judge_inference(generation1, context)
         judgment2 = self.judge_inference(generation2, context)
         
-        # Meta-judgment: Compare and analyze the judgments themselves
-        meta_judgment = self._meta_judge(judgment1, judgment2)
+        # Compute comparative metrics
+        semantic_similarity = self._compute_semantic_similarity(generation1, generation2)
         
-        self.judgment_history.append((judgment1, judgment2))
+        # Meta-judgment with advanced analysis
+        meta_judgment = self._meta_judge(judgment1, judgment2, semantic_similarity)
+        
+        # Compute training value
+        judgment1.training_value = self._compute_training_value(judgment1, judgment2)
+        judgment2.training_value = self._compute_training_value(judgment2, judgment1)
+        
+        # Persist training data
+        self._save_training_data(judgment1, judgment2)
+        
         return judgment1, judgment2
     
     def _meta_judge(
         self, 
         judgment1: Judgment, 
-        judgment2: Judgment
+        judgment2: Judgment,
+        semantic_similarity: float
     ) -> Dict[str, float]:
-        """Meta-level analysis of judgments."""
+        """Advanced meta-level analysis of judgments."""
+        total_score1 = sum(judgment1.scores.values())
+        total_score2 = sum(judgment2.scores.values())
+        
         meta_scores = {
-            'score_difference': abs(judgment1.compute_total_score() - 
-                                    judgment2.compute_total_score()),
-            'consistency_variance': np.std([
-                judgment1.scores.get(criteria, 0) 
-                for criteria in JudgmentCriteria
-            ]),
-            'meta_complexity': self._compute_meta_complexity(judgment1, judgment2)
+            'score_difference': abs(total_score1 - total_score2),
+            'semantic_similarity': semantic_similarity,
+            'score_variance': np.std([total_score1, total_score2]),
+            'complexity_delta': abs(self._compute_complexity(judgment1) - 
+                                    self._compute_complexity(judgment2))
         }
         
         judgment1.meta_scores = meta_scores
@@ -103,14 +131,35 @@ class JudgmentSystem:
         
         return meta_scores
     
-    def _compute_meta_complexity(
+    def _compute_training_value(
         self, 
-        judgment1: Judgment, 
-        judgment2: Judgment
+        primary_judgment: Judgment, 
+        comparative_judgment: Judgment
     ) -> float:
-        """Compute the meta-complexity of the comparison."""
-        # Implement advanced complexity calculation
-        return 0.0  # Placeholder
+        """Compute the training value of a judgment."""
+        # Complex training value computation
+        training_factors = [
+            abs(primary_judgment.scores.get(criteria, 0) - 
+                comparative_judgment.scores.get(criteria, 0))
+            for criteria in JudgmentCriteria
+        ]
+        return float(np.mean(training_factors))
+    
+    def _save_training_data(self, judgment1: Judgment, judgment2: Judgment):
+        """Save judgment data for future training."""
+        # Implement intelligent data management
+        existing_files = len(os.listdir(self.training_data_dir))
+        if existing_files < self.max_training_samples:
+            filename = os.path.join(
+                self.training_data_dir, 
+                f'judgment_{judgment1.id}_{judgment2.id}.json'
+            )
+            combined_data = {
+                'judgment1': judgment1.serialize(),
+                'judgment2': judgment2.serialize()
+            }
+            with open(filename, 'w') as f:
+                json.dump(combined_data, f, indent=2)
     
     def _assess_coherence(self, generation: Any) -> float:
         """Assess the coherence of a generation."""
@@ -134,8 +183,10 @@ class JudgmentSystem:
         return 0.0  # Placeholder
     
     def tournament(self, generations: List[Any], context: Dict[str, Any]) -> Any:
-        """Conduct a tournament to determine the best generation."""
-        results = []
+        """Conduct a comprehensive tournament."""
+        tournament_results = []
+        
+        # Pairwise comparisons
         for i in range(len(generations)):
             for j in range(i+1, len(generations)):
                 result = self.compare_generations(
@@ -143,17 +194,19 @@ class JudgmentSystem:
                     generations[j], 
                     context
                 )
-                results.append(result)
+                tournament_results.append(result)
         
-        # Determine winner based on accumulated scores
-        winner_index = max(
-            range(len(generations)), 
-            key=lambda i: sum(
-                judgment.compute_total_score() 
-                for judgment_pair in results 
+        # Advanced winner selection
+        def compute_tournament_score(generation):
+            return sum(
+                judgment.training_value 
+                for judgment_pair in tournament_results 
                 for judgment in judgment_pair 
-                if judgment.generation_id == generations[i]
+                if judgment.generation_id == str(hash(generation))
             )
-        )
         
-        return generations[winner_index]
+        return max(generations, key=compute_tournament_score)
+    
+    def _compute_complexity(self, judgment: Judgment) -> float:
+        """Compute the complexity of a judgment."""
+        return float(np.mean(list(judgment.scores.values())))
