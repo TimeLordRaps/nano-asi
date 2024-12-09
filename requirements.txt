@@ -39,6 +39,8 @@ distilabel>=0.1.5
 langgraph>=0.2.3
 mergekit>=0.3.1
 aider>=0.4.2
+networkx>=3.0.0
+rdflib>=6.0.0
 
 # =============================================
 # Optional Dependencies

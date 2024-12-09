@@ -8,6 +8,8 @@ import torch
 import uuid
 import json
 import os
+import networkx as nx
+import rdflib
 
 class JudgmentCriteria(Enum):
     COHERENCE = auto()
@@ -39,14 +41,104 @@ class Judgment:
             'training_value': self.training_value
         }
 
-class JudgmentSystem:
-    """Advanced self-improving judgment system."""
+class GraphRAGIntegration:
+    """Graph-based knowledge integration for judgments and inferences."""
     
-    def __init__(self, 
-                 training_data_dir: str = './judgment_training_data',
-                 max_training_samples: int = 10000):
+    def __init__(self, graph_db_path: str = './judgment_graph_db'):
+        self.graph = nx.DiGraph()
+        self.rdf_graph = rdflib.Graph()
+        self.graph_db_path = graph_db_path
+        os.makedirs(graph_db_path, exist_ok=True)
+    
+    def create_inference_node(
+        self, 
+        generation: Any, 
+        context: Dict[str, Any],
+        judgment: 'Judgment'
+    ) -> str:
+        """Create a node representing an inference in the graph."""
+        node_id = str(uuid.uuid4())
+        
+        # Add node to networkx graph
+        self.graph.add_node(node_id, {
+            'type': 'inference',
+            'generation': str(generation),
+            'context': json.dumps(context),
+            'judgment_id': judgment.id
+        })
+        
+        # Create RDF triples for semantic representation
+        inference_uri = rdflib.URIRef(f'http://nano-asi.org/inference/{node_id}')
+        self.rdf_graph.add((
+            inference_uri, 
+            rdflib.RDF.type, 
+            rdflib.URIRef('http://nano-asi.org/ontology/Inference')
+        ))
+        
+        # Add judgment-related triples
+        for criteria, score in judgment.scores.items():
+            self.rdf_graph.add((
+                inference_uri,
+                rdflib.URIRef(f'http://nano-asi.org/ontology/hasScore/{criteria}'),
+                rdflib.Literal(score)
+            ))
+        
+        return node_id
+    
+    def link_inferences(
+        self, 
+        inference1_node: str, 
+        inference2_node: str, 
+        relationship_type: str
+    ):
+        """Create a link between two inference nodes."""
+        self.graph.add_edge(inference1_node, inference2_node, type=relationship_type)
+        
+        # Create RDF triples for the relationship
+        inference1_uri = rdflib.URIRef(f'http://nano-asi.org/inference/{inference1_node}')
+        inference2_uri = rdflib.URIRef(f'http://nano-asi.org/inference/{inference2_node}')
+        relationship_uri = rdflib.URIRef(f'http://nano-asi.org/ontology/relationship/{relationship_type}')
+        
+        self.rdf_graph.add((
+            inference1_uri, 
+            relationship_uri, 
+            inference2_uri
+        ))
+    
+    def save_graph(self):
+        """Save the graph database."""
+        # Save NetworkX graph
+        nx.write_gpickle(self.graph, os.path.join(self.graph_db_path, 'inference_graph.nx'))
+        
+        # Save RDF graph
+        self.rdf_graph.serialize(
+            destination=os.path.join(self.graph_db_path, 'inference_graph.ttl'), 
+            format='turtle'
+        )
+    
+    def load_graph(self):
+        """Load the graph database."""
+        try:
+            self.graph = nx.read_gpickle(os.path.join(self.graph_db_path, 'inference_graph.nx'))
+            self.rdf_graph.parse(
+                os.path.join(self.graph_db_path, 'inference_graph.ttl'), 
+                format='turtle'
+            )
+        except FileNotFoundError:
+            print("No existing graph database found.")
+
+class JudgmentSystem:
+    """Advanced self-improving judgment system with graph-based knowledge integration."""
+    
+    def __init__(
+        self, 
+        training_data_dir: str = './judgment_training_data',
+        graph_db_path: str = './judgment_graph_db',
+        max_training_samples: int = 10000
+    ):
         self.training_data_dir = training_data_dir
         self.max_training_samples = max_training_samples
+        self.graph_integration = GraphRAGIntegration(graph_db_path)
         os.makedirs(training_data_dir, exist_ok=True)
         
     def _compute_embedding(self, generation: Any) -> torch.Tensor:
@@ -88,10 +180,23 @@ class JudgmentSystem:
         generation2: Any, 
         context: Dict[str, Any]
     ) -> Tuple[Judgment, Judgment]:
-        """Perform advanced pairwise comparison."""
+        """Perform advanced pairwise comparison with graph integration."""
         # Judge each generation
         judgment1 = self.judge_inference(generation1, context)
         judgment2 = self.judge_inference(generation2, context)
+        
+        # Create graph nodes for inferences
+        node1 = self.graph_integration.create_inference_node(
+            generation1, context, judgment1
+        )
+        node2 = self.graph_integration.create_inference_node(
+            generation2, context, judgment2
+        )
+        
+        # Link inferences in the graph
+        self.graph_integration.link_inferences(
+            node1, node2, 'pairwise_comparison'
+        )
         
         # Compute comparative metrics
         semantic_similarity = self._compute_semantic_similarity(generation1, generation2)
@@ -99,12 +204,23 @@ class JudgmentSystem:
         # Meta-judgment with advanced analysis
         meta_judgment = self._meta_judge(judgment1, judgment2, semantic_similarity)
         
-        # Compute training value
-        judgment1.training_value = self._compute_training_value(judgment1, judgment2)
-        judgment2.training_value = self._compute_training_value(judgment2, judgment1)
+        # Create graph node for meta-judgment
+        meta_node = self.graph_integration.create_inference_node(
+            {'generation1': generation1, 'generation2': generation2},
+            context,
+            Judgment(
+                generation_id='meta_judgment',
+                context=context,
+                scores=meta_judgment
+            )
+        )
         
-        # Persist training data
-        self._save_training_data(judgment1, judgment2)
+        # Link meta-judgment to original inferences
+        self.graph_integration.link_inferences(node1, meta_node, 'meta_judgment')
+        self.graph_integration.link_inferences(node2, meta_node, 'meta_judgment')
+        
+        # Save graph periodically or after significant events
+        self.graph_integration.save_graph()
         
         return judgment1, judgment2
     
@@ -183,7 +299,13 @@ class JudgmentSystem:
         return 0.0  # Placeholder
     
     def tournament(self, generations: List[Any], context: Dict[str, Any]) -> Any:
-        """Conduct a comprehensive tournament."""
+        """Conduct a comprehensive tournament with graph tracking."""
+        tournament_node = self.graph_integration.create_inference_node(
+            {'tournament_generations': len(generations)},
+            context,
+            Judgment(generation_id='tournament', context=context)
+        )
+        
         tournament_results = []
         
         # Pairwise comparisons
@@ -194,6 +316,17 @@ class JudgmentSystem:
                     generations[j], 
                     context
                 )
+                
+                # Link tournament node to comparison results
+                comparison_node = self.graph_integration.create_inference_node(
+                    {'generation1': generations[i], 'generation2': generations[j]},
+                    context,
+                    Judgment(generation_id='tournament_comparison', context=context)
+                )
+                self.graph_integration.link_inferences(
+                    tournament_node, comparison_node, 'tournament_comparison'
+                )
+                
                 tournament_results.append(result)
         
         # Advanced winner selection
@@ -205,7 +338,22 @@ class JudgmentSystem:
                 if judgment.generation_id == str(hash(generation))
             )
         
-        return max(generations, key=compute_tournament_score)
+        winner = max(generations, key=compute_tournament_score)
+        
+        # Mark winner in the graph
+        winner_node = self.graph_integration.create_inference_node(
+            {'winner': winner},
+            context,
+            Judgment(generation_id='tournament_winner', context=context)
+        )
+        self.graph_integration.link_inferences(
+            tournament_node, winner_node, 'tournament_winner'
+        )
+        
+        # Save final tournament graph
+        self.graph_integration.save_graph()
+        
+        return winner
     
     def _compute_complexity(self, judgment: Judgment) -> float:
         """Compute the complexity of a judgment."""
