@@ -5,8 +5,8 @@ import torch
 import numpy as np
 from typing import Dict, Any
 
-from nano_asi.modules import ConsciousnessTracker, LoRAGenerator
-from nano_asi.core import Config
+from nano-asi.modules import ConsciousnessTracker, LoRAGenerator
+from nano-asi.core import Config
 
 @pytest.fixture
 def config():
