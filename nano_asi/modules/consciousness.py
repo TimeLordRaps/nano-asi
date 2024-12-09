@@ -253,7 +253,7 @@ class ConsciousnessTracker:
         # 2. Apply quantum-inspired scaling
         quantum_scaling = torch.tanh(normalized)
         
-        return quantum_scaling
+        return quantum_scaling.unsqueeze(0)  # Add batch dimension
 
     def _compute_quantum_coherence(self, values: torch.Tensor) -> Dict[str, float]:
         """

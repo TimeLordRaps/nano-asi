@@ -339,7 +339,9 @@ class LoRAGenerator(nn.Module):
             'metadata': {
                 'timestamp': time.time(),
                 'consciousness_integrated': consciousness_tracker is not None
-            }
+            },
+            'consciousness_flow': {},
+            'improvement_history': []
         }
         
         # If consciousness tracker is provided, track the flow
@@ -347,6 +349,7 @@ class LoRAGenerator(nn.Module):
             state = await consciousness_tracker.track_consciousness({
                 'activations': [{'values': conditional_tokens}]
             })
+            adapter['consciousness_flow'] = state
         
         return adapter
 
