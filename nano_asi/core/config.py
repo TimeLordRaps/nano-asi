@@ -593,7 +593,8 @@ class Config(BaseModel):
         # Delegate to TokenInvestmentConfig's more sophisticated tracking method
         self.token_investment.record_token_investment(tokens, context)
     
-    class Config:
-        arbitrary_types_allowed = True
-        extra = "allow"
-        validate_assignment = True
+    model_config = {
+        "arbitrary_types_allowed": True,
+        "extra": "allow",
+        "validate_assignment": True
+    }
