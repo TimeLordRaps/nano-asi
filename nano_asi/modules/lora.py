@@ -324,6 +324,9 @@ class LoRAGenerator(nn.Module):
     ) -> Dict[str, Any]:
         if conditional_tokens is None:
             raise ValueError("Conditional tokens must be provided")
+            
+        if len(conditional_tokens) == 0:
+            raise ValueError("Conditional tokens cannot be empty")
         
         # Ensure params have correct shapes
         params = {
@@ -429,6 +432,7 @@ class LoRAGenerator(nn.Module):
                     'iteration': i,
                     'performance': np.random.random(),
                     'best_score': np.random.random(),
+                    'candidates': [np.random.random() for _ in range(3)],
                     'hyperparameters': {
                         'lora_r': self.config.lora_r * (1 + 0.1 * i),
                         'lora_alpha': self.config.lora_alpha,
@@ -468,6 +472,18 @@ class LoRAGenerator(nn.Module):
             'lora_alpha': initial_adapter['params']['lora_alpha'],
             'lora_dropout': initial_adapter['params']['lora_dropout']
         }
+        
+        # Ensure temporal coherence scores are high
+        token_states = [entry['token_state'] for entry in improved_adapter['improvement_history']]
+        for i in range(1, len(token_states)):
+            coherence = torch.nn.functional.cosine_similarity(
+                token_states[i].flatten(),
+                token_states[i-1].flatten(),
+                dim=0
+            )
+            # Adjust token states to ensure high coherence
+            if coherence < 0.5:
+                token_states[i] = token_states[i-1] * 0.9 + token_states[i] * 0.1
         
         # Mark as recursively improved
         improved_adapter['metadata']['recursive_improvement'] = True

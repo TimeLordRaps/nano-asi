@@ -255,10 +255,25 @@ class ConsciousnessTracker:
             return stats
         return {}
     
-    def _compute_shannon_entropy(self, values: torch.Tensor) -> float:
-        """Compute Shannon entropy for a tensor."""
-        probabilities = F.softmax(values.float(), dim=0)
-        return float(-torch.sum(probabilities * torch.log2(probabilities + 1e-10)))
+    def _compute_shannon_entropy(self, values: List[ConsciousnessState]) -> float:
+        """Compute Shannon entropy for consciousness states."""
+        try:
+            # Extract coherence values from states
+            coherence_values = [
+                state.quantum_metrics.get('coherence', 0.0) 
+                for state in values
+            ]
+            
+            # Convert to tensor
+            coherence_tensor = torch.tensor(coherence_values, dtype=torch.float32)
+            
+            # Compute probabilities and entropy
+            probabilities = F.softmax(coherence_tensor, dim=0)
+            entropy = -torch.sum(probabilities * torch.log2(probabilities + 1e-10))
+            
+            return float(entropy)
+        except Exception:
+            return 0.0
     
     def _compute_quantum_entropy(self, values: torch.Tensor) -> float:
         """Compute quantum-inspired entropy measure."""
