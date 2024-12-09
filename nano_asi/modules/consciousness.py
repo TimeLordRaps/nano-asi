@@ -462,6 +462,36 @@ class ConsciousnessTracker:
         # Measure of how gradients propagate information
         grad_magnitude = torch.norm(grads, dim=0)
         return float(torch.mean(grad_magnitude))
+
+    def _compute_phase_alignment(self, states):
+        """Compute phase alignment across consciousness states."""
+        if len(states) < 2:
+            return 0.0
+        
+        # Simple phase alignment using cosine similarity
+        alignments = [
+            torch.nn.functional.cosine_similarity(
+                torch.tensor(state.quantum_metrics.get('coherence', 0.0)).unsqueeze(0),
+                torch.tensor(states[i+1].quantum_metrics.get('coherence', 0.0)).unsqueeze(0),
+                dim=0
+            ).item()
+            for i, state in enumerate(states[:-1])
+        ]
+        
+        return float(np.mean(alignments)) if alignments else 0.0
+
+    def _analyze_temporal_complexity(self, states):
+        """Compute temporal complexity of consciousness states."""
+        if not states:
+            return 0.0
+        
+        # Compute complexity based on state variations
+        complexity_scores = [
+            len(state.meta_insights) + len(state.thought_chains)
+            for state in states
+        ]
+        
+        return float(np.std(complexity_scores)) if len(complexity_scores) > 1 else 0.0
     
     def _classify_pattern(self, activation: Dict[str, Any]) -> str:
         """Classify activation pattern type using advanced heuristics."""

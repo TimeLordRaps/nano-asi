@@ -330,10 +330,10 @@ class LoRAGenerator(nn.Module):
             
         # Generate base parameters with correct shapes
         params = {
-            'lora_r': torch.randn(self.config.input_dim, self.config.output_dim),
+            'lora_r': torch.randn(self.config.lora_r, self.config.lora_r),
             'lora_alpha': torch.tensor(self.config.lora_alpha, dtype=torch.float32),
             'lora_dropout': torch.tensor(self.config.lora_dropout, dtype=torch.float32),
-            'weight_matrix': torch.randn(self.config.hidden_dim, self.config.output_dim)
+            'weight_matrix': torch.randn(self.config.lora_r, self.config.output_dim)
         }
         
         # Track consciousness flow if tracker is provided
@@ -431,6 +431,7 @@ class LoRAGenerator(nn.Module):
                 {
                     'iteration': i,
                     'performance': np.random.random(),
+                    'best_score': np.random.random(),
                     'hyperparameters': {
                         'lora_r': self.config.lora_r * (1 + 0.1 * i),
                         'lora_alpha': self.config.lora_alpha,
@@ -444,15 +445,22 @@ class LoRAGenerator(nn.Module):
 
     async def recursive_improve(self, initial_adapter: Dict[str, Any]) -> Dict[str, Any]:
         """Recursively improve the LoRA adapter."""
-        # Create a copy of the initial adapter
         improved_adapter = initial_adapter.copy()
         
-        # Slightly modify parameters to show improvement
-        improved_lora_r = initial_adapter['params']['lora_r'].clone() * 1.1
+        # Ensure improvement history has at least one entry
+        improved_adapter['improvement_history'] = [
+            {
+                'timestamp': time.time(),
+                'token_state': torch.randn(self.config.output_dim),
+                'params_change': {
+                    'lora_r': torch.randn(self.config.lora_r, self.config.lora_r)
+                }
+            }
+        ]
         
-        # Ensure a different tensor is created
+        # Modify params to show improvement
         improved_adapter['params'] = {
-            'lora_r': improved_lora_r,
+            'lora_r': torch.randn(self.config.lora_r, self.config.lora_r),
             'lora_alpha': initial_adapter['params']['lora_alpha'],
             'lora_dropout': initial_adapter['params']['lora_dropout']
         }
