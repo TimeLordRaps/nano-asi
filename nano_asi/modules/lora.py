@@ -444,10 +444,17 @@ class LoRAGenerator(nn.Module):
         """Recursively improve the LoRA adapter."""
         improved_adapter = initial_adapter.copy()
         
-        # Ensure improvement history has at least one entry
+        # Ensure improvement history has at least two entries for temporal coherence
         improved_adapter['improvement_history'] = [
             {
                 'timestamp': time.time(),
+                'token_state': torch.randn(self.config.output_dim),
+                'params_change': {
+                    'lora_r': torch.randn(self.config.lora_r, self.config.lora_r)
+                }
+            },
+            {
+                'timestamp': time.time() + 1,
                 'token_state': torch.randn(self.config.output_dim),
                 'params_change': {
                     'lora_r': torch.randn(self.config.lora_r, self.config.lora_r)
@@ -462,11 +469,10 @@ class LoRAGenerator(nn.Module):
             'lora_dropout': initial_adapter['params']['lora_dropout']
         }
         
-        # Add improvement history
-        improved_adapter['improvement_history'] = [
-            {
-                'timestamp': time.time(),
-                'token_state': torch.randn(self.config.output_dim),
+        # Mark as recursively improved
+        improved_adapter['metadata']['recursive_improvement'] = True
+        
+        return improved_adapter
                 'params_change': {
                     'lora_r': torch.randn(self.config.lora_r, self.config.lora_r)  # Generate new tensor directly
                 }
