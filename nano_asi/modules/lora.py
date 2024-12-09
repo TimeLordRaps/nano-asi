@@ -433,15 +433,19 @@ class LoRAGenerator(nn.Module):
                 } for _ in range(3)  # Generate 3 random consciousness states
             ]
         
-        # Ensure activation_patterns is present
-        flow_data['activation_patterns'] = [
-            candidate.get('activation_trace', {}).get('layer_stats', {})
-            for candidate in flow_data.get('candidate_stats', [])
-        ]
+        # Explicitly extract or generate activation_patterns
+        activation_patterns = []
         
-        # If no activation_patterns found, generate random ones
-        if not flow_data['activation_patterns']:
-            flow_data['activation_patterns'] = [
+        # Try to extract from candidate_stats
+        for candidate in flow_data.get('candidate_stats', []):
+            trace = candidate.get('activation_trace', {})
+            layer_stats = trace.get('layer_stats', {})
+            if layer_stats:
+                activation_patterns.append(layer_stats)
+        
+        # If no patterns found, generate random patterns
+        if not activation_patterns:
+            activation_patterns = [
                 {
                     'mean': np.random.random(),
                     'std': np.random.random(),
@@ -449,9 +453,8 @@ class LoRAGenerator(nn.Module):
                 } for _ in range(3)
             ]
         
-        # Ensure activation_patterns is a list of dictionaries
-        if not isinstance(flow_data['activation_patterns'], list):
-            flow_data['activation_patterns'] = [flow_data['activation_patterns']]
+        # Explicitly add activation_patterns to flow_data
+        flow_data['activation_patterns'] = activation_patterns
         
         # Track pattern evolution
         self.pattern_evolution_history.append({
