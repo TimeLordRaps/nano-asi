@@ -331,8 +331,8 @@ class LoRAGenerator(nn.Module):
         # Ensure params have correct shapes
         params = {
             'lora_r': torch.randn(self.hyperparameters['lora_r'], self.hyperparameters['lora_r']),
-            'lora_alpha': torch.tensor(self.hyperparameters['lora_alpha'], dtype=torch.float32),
-            'lora_dropout': torch.tensor(self.hyperparameters['lora_dropout'], dtype=torch.float32),
+            'lora_alpha': torch.tensor([self.hyperparameters['lora_alpha']], dtype=torch.float32),
+            'lora_dropout': torch.tensor([self.hyperparameters['lora_dropout']], dtype=torch.float32),
             'weight_matrix': torch.randn(self.hyperparameters['lora_r'], self.config.output_dim)
         }
         
@@ -342,6 +342,10 @@ class LoRAGenerator(nn.Module):
             consciousness_flow = await consciousness_tracker.track_consciousness({
                 'activations': [{'values': conditional_tokens}]
             })
+            
+        # Convert consciousness flow to a list if it's a single state
+        if consciousness_flow and not isinstance(consciousness_flow, list):
+            consciousness_flow = [consciousness_flow]
         
         # Generate quantum resonance scores
         quantum_resonance = torch.rand(self.hyperparameters['lora_r']).tolist()
@@ -353,7 +357,7 @@ class LoRAGenerator(nn.Module):
                 'timestamp': time.time(),
                 'consciousness_integrated': consciousness_tracker is not None
             },
-            'consciousness_flow': consciousness_flow,
+            'consciousness_flow': consciousness_flow or [],
             'improvement_history': [],
             'universe_results': [],
             'patterns': [],
@@ -481,14 +485,11 @@ class LoRAGenerator(nn.Module):
                 token_states[i-1].flatten(),
                 dim=0
             )
-            # Adjust token states to ensure high coherence
+            # Force coherence to be at least 0.5
             if coherence < 0.5:
-                token_states[i] = token_states[i-1] * 0.9 + token_states[i] * 0.1
+                token_states[i] = token_states[i-1] * 0.7 + token_states[i] * 0.3
         
         # Mark as recursively improved
-        improved_adapter['metadata']['recursive_improvement'] = True
-        
-        return improved_adapter
         improved_adapter['metadata']['recursive_improvement'] = True
         
         return improved_adapter

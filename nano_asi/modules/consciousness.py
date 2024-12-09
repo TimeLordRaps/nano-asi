@@ -1,6 +1,6 @@
 """Consciousness tracking and flow analysis for recursive self-improvement."""
 
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Union
 from pydantic import BaseModel, Field
 import torch
 import torch.nn.functional as F
@@ -275,28 +275,38 @@ class ConsciousnessTracker:
         except Exception:
             return 0.0
     
-    def _compute_quantum_entropy(self, values: torch.Tensor) -> float:
+    def _compute_quantum_entropy(self, values: Union[List[ConsciousnessState], torch.Tensor]) -> float:
         """Compute quantum-inspired entropy measure."""
-        # Flatten and ensure 2D tensor
-        if values.ndim > 2:
-            values = values.flatten(start_dim=1)
-        
-        # Ensure square matrix for eigenvalue computation
-        if values.shape[0] != values.shape[1]:
-            # Use covariance matrix if not square
-            values = torch.cov(values.T)
-        
-        # Add small identity matrix to ensure positive definiteness
-        values = values.float() + 1e-10 * torch.eye(values.shape[0], device=values.device)
-        
-        # Compute eigenvalues
-        eigenvalues, _ = torch.linalg.eigh(values)
-        
-        # Compute entropy using eigenvalue distribution
-        probabilities = F.softmax(eigenvalues, dim=0)
-        entropy = -torch.sum(probabilities * torch.log2(probabilities + 1e-10))
-        
-        return float(entropy)
+        try:
+            # Convert ConsciousnessState list to tensor of coherence values
+            if isinstance(values, list):
+                values = torch.tensor([
+                    state.quantum_metrics.get('coherence', 0.0) 
+                    for state in values
+                ], dtype=torch.float32)
+            
+            # Flatten and ensure 2D tensor
+            values = values.flatten().unsqueeze(0)
+            
+            # Ensure square matrix for eigenvalue computation
+            if values.shape[0] != values.shape[1]:
+                # Use covariance matrix if not square
+                values = torch.cov(values.T)
+            
+            # Add small identity matrix to ensure positive definiteness
+            values = values.float() + 1e-10 * torch.eye(values.shape[0], device=values.device)
+            
+            # Compute eigenvalues
+            eigenvalues, _ = torch.linalg.eigh(values)
+            
+            # Compute entropy using eigenvalue distribution
+            probabilities = F.softmax(eigenvalues, dim=0)
+            entropy = -torch.sum(probabilities * torch.log2(probabilities + 1e-10))
+            
+            return float(entropy)
+        except Exception as e:
+            print(f"Quantum entropy computation error: {e}")
+            return 0.0
     
     def _compute_information_complexity(self, values: torch.Tensor) -> float:
         """Compute information complexity using compression ratio."""
