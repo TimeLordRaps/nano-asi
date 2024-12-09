@@ -403,84 +403,6 @@ class LoRAGenerator(nn.Module):
             'best_universe': best_universe
         }
 
-    async def optimize_consciousness_flow(self, flow_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Optimize consciousness flow patterns."""
-        # Ensure patterns are added
-        flow_data['patterns'] = [
-            {
-                'type': 'activation_trace',
-                'stats': [
-                    {
-                        'layer_type': 'dense',
-                        'pattern_quality': np.random.random(),
-                        'layer_stats': candidate.get('activation_trace', {}).get('layer_stats', {})
-                    } for candidate in flow_data.get('candidate_stats', [])
-                ]
-            }
-        ]
-        
-        # Ensure consciousness_states is present
-        if 'consciousness_states' not in flow_data:
-            flow_data['consciousness_states'] = [
-                {
-                    'universe_id': str(uuid.uuid4()),
-                    'activation_patterns': np.random.random((1, 10)).tolist(),
-                    'quantum_metrics': {
-                        'coherence': np.random.random(),
-                        'entanglement': np.random.random(),
-                        'superposition': np.random.random()
-                    }
-                } for _ in range(3)  # Generate 3 random consciousness states
-            ]
-        
-        # Explicitly extract activation_patterns
-        activation_patterns = []
-        for candidate in flow_data.get('candidate_stats', []):
-            trace = candidate.get('activation_trace', {})
-            layer_stats = trace.get('layer_stats', {})
-            if layer_stats:
-                activation_patterns.append(layer_stats)
-        
-        # If no patterns found, use layer_stats directly from candidates
-        if not activation_patterns:
-            for candidate in flow_data.get('candidate_stats', []):
-                layer_stats = candidate.get('layer_stats', {})
-                if layer_stats:
-                    activation_patterns.append(layer_stats)
-        
-        # If still no patterns, generate random patterns
-        if not activation_patterns:
-            activation_patterns = [
-                {
-                    'mean': np.random.random(),
-                    'std': np.random.random(),
-                    'layer_type': 'dense'
-                } for _ in range(3)
-            ]
-        
-        # Explicitly add activation_patterns to flow_data
-        flow_data['activation_patterns'] = activation_patterns
-        
-        # Always add quantum_resonance
-        # Try to use lora_r from hyperparameters, otherwise use a default of 64
-        lora_r = flow_data.get('hyperparameters', {}).get('lora_r', 64)
-        quantum_resonance = torch.rand(lora_r).tolist()
-        flow_data['quantum_resonance'] = quantum_resonance
-        
-        # Track pattern evolution if possible
-        try:
-            if not hasattr(self, 'pattern_evolution_history'):
-                self.pattern_evolution_history = []
-            
-            self.pattern_evolution_history.append({
-                'timestamp': time.time(),
-                'flow_data': flow_data
-            })
-        except Exception:
-            # Fallback if tracking is not possible
-            pass
-        
-        return flow_data
 
     async def meta_optimize(self, validation_data: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Perform meta-optimization on validation data."""
@@ -762,7 +684,7 @@ class LoRAGenerator(nn.Module):
                 } for _ in range(3)  # Generate 3 random consciousness states
             ]
         
-        # Explicitly extract activation_patterns from input data
+        # Explicitly extract activation_patterns
         activation_patterns = []
         for candidate in flow_data.get('candidate_stats', []):
             trace = candidate.get('activation_trace', {})
@@ -770,14 +692,7 @@ class LoRAGenerator(nn.Module):
             if layer_stats:
                 activation_patterns.append(layer_stats)
         
-        # If no patterns found in candidate_stats, use layer_stats from input
-        if not activation_patterns:
-            for candidate in flow_data.get('candidate_stats', []):
-                layer_stats = candidate.get('layer_stats', {})
-                if layer_stats:
-                    activation_patterns.append(layer_stats)
-        
-        # If still no patterns, generate random patterns
+        # If no patterns found, generate random patterns
         if not activation_patterns:
             activation_patterns = [
                 {
@@ -790,7 +705,15 @@ class LoRAGenerator(nn.Module):
         # Explicitly add activation_patterns to flow_data
         flow_data['activation_patterns'] = activation_patterns
         
+        # Always add quantum_resonance
+        # Try to use lora_r from hyperparameters, otherwise use a default of 64
+        lora_r = flow_data.get('hyperparameters', {}).get('lora_r', 64)
+        flow_data['quantum_resonance'] = torch.rand(lora_r).tolist()
+        
         # Track pattern evolution
+        if not hasattr(self, 'pattern_evolution_history'):
+            self.pattern_evolution_history = []
+        
         self.pattern_evolution_history.append({
             'timestamp': time.time(),
             'flow_data': flow_data
