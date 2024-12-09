@@ -8,38 +8,7 @@ import torch
 import uuid
 import json
 import os
-import networkx as nx
-import rdflib
-
-class GraphRAGIntegration:
-    """Graph-based knowledge integration for judgments and inferences."""
-    
-    def __init__(self, graph_db_path: str = './judgment_graph_db'):
-        self.graph = nx.DiGraph()
-        self.rdf_graph = rdflib.Graph()
-        self.graph_db_path = graph_db_path
-        os.makedirs(graph_db_path, exist_ok=True)
-    
-    def create_node(self, data: Dict[str, Any]) -> str:
-        """Create a node in the graph."""
-        node_id = str(uuid.uuid4())
-        self.graph.add_node(node_id, **data)
-        return node_id
-    
-    def link_nodes(self, node1: str, node2: str, relationship_type: str):
-        """Create a link between two nodes."""
-        self.graph.add_edge(node1, node2, type=relationship_type)
-    
-    def save_graph(self):
-        """Save the graph database."""
-        nx.write_gpickle(self.graph, os.path.join(self.graph_db_path, 'inference_graph.nx'))
-    
-    def load_graph(self):
-        """Load the graph database."""
-        try:
-            self.graph = nx.read_gpickle(os.path.join(self.graph_db_path, 'inference_graph.nx'))
-        except FileNotFoundError:
-            print("No existing graph database found.")
+from nano_graphrag import GraphRAG, QueryParam
 
 class JudgmentCriteria(Enum):
     COHERENCE = auto()
@@ -158,7 +127,7 @@ class GraphRAGIntegration:
             print("No existing graph database found.")
 
 class JudgmentSystem:
-    """Advanced self-improving judgment system with graph-based knowledge integration."""
+    """Advanced self-improving judgment system with nano-graphrag integration."""
     
     def __init__(
         self, 
@@ -168,7 +137,13 @@ class JudgmentSystem:
     ):
         self.training_data_dir = training_data_dir
         self.max_training_samples = max_training_samples
-        self.graph_integration = GraphRAGIntegration(graph_db_path)
+        
+        # Initialize GraphRAG with working directory
+        self.graph_rag = GraphRAG(
+            working_dir=graph_db_path,
+            enable_llm_cache=True
+        )
+        
         os.makedirs(training_data_dir, exist_ok=True)
         
     def _compute_embedding(self, generation: Any) -> torch.Tensor:
@@ -210,28 +185,25 @@ class JudgmentSystem:
         generation2: Any, 
         context: Dict[str, Any]
     ) -> Tuple[Judgment, Judgment]:
-        """Perform advanced pairwise comparison with graph integration."""
+        """Perform advanced pairwise comparison with GraphRAG integration."""
         # Judge each generation using existing methods
         judgment1 = self.judge_inference(generation1, context)
         judgment2 = self.judge_inference(generation2, context)
         
-        # Create graph nodes for inferences
-        node1 = self.graph_integration.create_node({
-            'type': 'inference',
-            'generation': str(generation1),
-            'context': json.dumps(context),
-            'judgment': judgment1.serialize()
-        })
+        # Prepare data for GraphRAG insertion
+        comparison_data = {
+            'generation1': str(generation1),
+            'generation2': str(generation2),
+            'judgment1': judgment1.serialize(),
+            'judgment2': judgment2.serialize(),
+            'context': context
+        }
         
-        node2 = self.graph_integration.create_node({
-            'type': 'inference',
-            'generation': str(generation2),
-            'context': json.dumps(context),
-            'judgment': judgment2.serialize()
-        })
-        
-        # Link inferences in the graph
-        self.graph_integration.link_nodes(node1, node2, 'pairwise_comparison')
+        # Insert comparison data into graph
+        try:
+            self.graph_rag.insert(json.dumps(comparison_data))
+        except Exception as e:
+            print(f"Error inserting comparison to GraphRAG: {e}")
         
         # Compute comparative metrics
         semantic_similarity = self._compute_semantic_similarity(generation1, generation2)
@@ -239,20 +211,20 @@ class JudgmentSystem:
         # Meta-judgment with advanced analysis
         meta_judgment = self._meta_judge(judgment1, judgment2, semantic_similarity)
         
-        # Create graph node for meta-judgment
-        meta_node = self.graph_integration.create_node({
-            'type': 'meta_judgment',
-            'generations': [str(generation1), str(generation2)],
-            'context': json.dumps(context),
-            'meta_scores': meta_judgment
-        })
+        # Query GraphRAG for additional insights
+        try:
+            graph_insights = self.graph_rag.query(
+                f"Analyze comparison between {generation1} and {generation2}",
+                param=QueryParam(mode="local")
+            )
+        except Exception as e:
+            print(f"Error querying GraphRAG: {e}")
+            graph_insights = None
         
-        # Link meta-judgment to original inferences
-        self.graph_integration.link_nodes(node1, meta_node, 'meta_judgment')
-        self.graph_integration.link_nodes(node2, meta_node, 'meta_judgment')
-        
-        # Save graph periodically or after significant events
-        self.graph_integration.save_graph()
+        # Optionally update judgments with graph insights
+        if graph_insights:
+            judgment1.meta_scores['graph_insights'] = graph_insights
+            judgment2.meta_scores['graph_insights'] = graph_insights
         
         return judgment1, judgment2
     
@@ -331,13 +303,17 @@ class JudgmentSystem:
         return 0.0  # Placeholder
     
     def tournament(self, generations: List[Any], context: Dict[str, Any]) -> Any:
-        """Conduct a comprehensive tournament with graph tracking."""
-        # Create tournament node
-        tournament_node = self.graph_integration.create_node({
-            'type': 'tournament',
-            'num_generations': len(generations),
-            'context': json.dumps(context)
-        })
+        """Conduct a comprehensive tournament with GraphRAG tracking."""
+        tournament_data = {
+            'generations': [str(gen) for gen in generations],
+            'context': context
+        }
+        
+        # Insert tournament data into graph
+        try:
+            self.graph_rag.insert(json.dumps(tournament_data))
+        except Exception as e:
+            print(f"Error inserting tournament to GraphRAG: {e}")
         
         tournament_results = []
         
@@ -349,19 +325,6 @@ class JudgmentSystem:
                     generations[j], 
                     context
                 )
-                
-                # Create comparison node
-                comparison_node = self.graph_integration.create_node({
-                    'type': 'tournament_comparison',
-                    'generations': [str(generations[i]), str(generations[j])],
-                    'context': json.dumps(context)
-                })
-                
-                # Link tournament node to comparison
-                self.graph_integration.link_nodes(
-                    tournament_node, comparison_node, 'tournament_comparison'
-                )
-                
                 tournament_results.append(result)
         
         # Advanced winner selection
@@ -375,20 +338,15 @@ class JudgmentSystem:
         
         winner = max(generations, key=compute_tournament_score)
         
-        # Create winner node
-        winner_node = self.graph_integration.create_node({
-            'type': 'tournament_winner',
-            'winner': str(winner),
-            'context': json.dumps(context)
-        })
-        
-        # Link winner to tournament node
-        self.graph_integration.link_nodes(
-            tournament_node, winner_node, 'tournament_winner'
-        )
-        
-        # Save final tournament graph
-        self.graph_integration.save_graph()
+        # Query GraphRAG for tournament insights
+        try:
+            tournament_insights = self.graph_rag.query(
+                f"Analyze tournament winner: {winner}",
+                param=QueryParam(mode="global")
+            )
+        except Exception as e:
+            print(f"Error querying tournament insights: {e}")
+            tournament_insights = None
         
         return winner
     
