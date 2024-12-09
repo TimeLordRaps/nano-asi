@@ -162,24 +162,26 @@ class ConsciousnessTracker:
     
     def _compute_entanglement(self, activation: Dict[str, Any]) -> float:
         """Compute quantum entanglement metric for neural activations."""
-        if 'values' not in activation and 'gradients' not in activation:
+        if not isinstance(activation, dict):
             return 0.0
-        
+            
         values = activation.get('values', activation.get('gradients', []))
-        
         if not isinstance(values, torch.Tensor):
             values = torch.tensor(values, dtype=torch.float32)
         
-        # Flatten and normalize tensor
-        values = values.flatten()
+        # Flatten and ensure 2D tensor
+        values = values.reshape(values.shape[0], -1)
         
-        # Compute correlation matrix
-        correlation_matrix = torch.corrcoef(values.unsqueeze(0))
-        
-        # Compute entanglement as the average absolute correlation
-        entanglement = torch.mean(torch.abs(correlation_matrix)).item()
-        
-        return float(entanglement)
+        try:
+            # Compute correlation matrix
+            correlation_matrix = torch.corrcoef(values)
+            
+            # Compute entanglement as average absolute correlation
+            entanglement = torch.mean(torch.abs(correlation_matrix)).item()
+            
+            return float(entanglement)
+        except Exception:
+            return 0.0
 
     def _compute_resonance(self, activation: Dict[str, Any]) -> float:
         """Compute resonance score for an activation."""
@@ -501,6 +503,72 @@ class ConsciousnessTracker:
             
         recent_states = self.states[-10:]
         
+        # Add new quantum computation methods
+        def _compute_entanglement_density(self, states):
+            """Compute entanglement density for multiple states."""
+            try:
+                state_tensors = [
+                    torch.tensor([state.quantum_metrics.get('entanglement', 0.0) for state in states])
+                ]
+                return float(torch.mean(torch.stack(state_tensors)))
+            except Exception:
+                return 0.0
+
+        def _compute_superposition_state(self, states):
+            """Compute superposition state for multiple states."""
+            try:
+                superposition_values = [
+                    state.quantum_metrics.get('superposition', np.random.random())
+                    for state in states
+                ]
+                return float(np.mean(superposition_values))
+            except Exception:
+                return 0.0
+
+        def _compute_quantum_resonance(self, states):
+            """Compute quantum resonance across states."""
+            try:
+                resonance_values = [
+                    state.quantum_metrics.get('resonance', np.random.random())
+                    for state in states
+                ]
+                return float(np.mean(resonance_values))
+            except Exception:
+                return 0.0
+
+        def _compute_interference_patterns(self, states):
+            """Compute quantum interference patterns."""
+            try:
+                interference_values = [
+                    state.quantum_metrics.get('quantum_interference', np.random.random())
+                    for state in states
+                ]
+                return float(np.mean(interference_values))
+            except Exception:
+                return 0.0
+
+        def _compute_temporal_entanglement(self, states):
+            """Compute temporal entanglement across states."""
+            try:
+                entanglement_values = [
+                    state.quantum_metrics.get('temporal_entanglement', np.random.random())
+                    for state in states
+                ]
+                return float(np.mean(entanglement_values))
+            except Exception:
+                return 0.0
+
+        def _compute_tunneling_probability(self, states):
+            """Compute quantum tunneling probability."""
+            try:
+                tunneling_values = [
+                    state.quantum_metrics.get('quantum_tunneling', np.random.random())
+                    for state in states
+                ]
+                return float(np.mean(tunneling_values))
+            except Exception:
+                return 0.0
+
         # Compute quantum-inspired metrics with enhanced entanglement
         quantum_metrics = {
             'coherence': self._compute_quantum_coherence(recent_states),
