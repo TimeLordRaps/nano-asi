@@ -368,6 +368,7 @@ class LoRAGenerator(nn.Module):
             {
                 'id': str(uuid.uuid4()),
                 'adapter_variation': np.random.random(self.config.output_dim).tolist()
+                'adapter_variation': np.random.random(self.config.output_dim).tolist()
             }
             for _ in range(num_universes)
         ]
