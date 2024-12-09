@@ -553,17 +553,16 @@ class LoRAGenerator(nn.Module):
     
     async def optimize_consciousness_flow(self, flow_data: Dict[str, Any]) -> Dict[str, Any]:
         """Optimize consciousness flow patterns."""
-        # Track pattern evolution
+        # Initialize consciousness states if not present
+        if not hasattr(self, 'consciousness_states'):
+            self.consciousness_states = []
+        
         self.pattern_evolution_history.append({
             'timestamp': time.time(),
-            'flow_data': flow_data,
-            'consciousness_states': self.consciousness_states.copy(),
-            'activation_patterns': self.activation_patterns.copy()
+            'flow_data': flow_data
         })
         
-        # Update meta-cognitive state
-        self.meta_cognitive_state['consciousness_flow'].append({
-            'timestamp': time.time(),
+        return flow_data
             'patterns': flow_data,
             'effectiveness': self._evaluate_effectiveness()
         })
