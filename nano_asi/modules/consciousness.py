@@ -720,6 +720,30 @@ class ConsciousnessTracker:
         except Exception:
             return {}
 
+    def _compute_phase_stability(self, state: ConsciousnessState) -> float:
+        """Compute phase stability for a consciousness state."""
+        try:
+            # Use quantum metrics for phase stability
+            coherence = state.quantum_metrics.get('coherence', 0.0)
+            entanglement = state.quantum_metrics.get('entanglement', 0.0)
+            
+            # Simple phase stability calculation
+            return (coherence + entanglement) / 2.0
+        except Exception:
+            return 0.0
+
+    def _compute_causal_alignment(self, state: ConsciousnessState) -> float:
+        """Compute causal alignment for a consciousness state."""
+        try:
+            # Use thought chains and meta insights for causal alignment
+            thought_complexity = len(state.thought_chains)
+            meta_complexity = len(state.meta_insights)
+            
+            # Simple causal alignment calculation
+            return (thought_complexity + meta_complexity) / 2.0
+        except Exception:
+            return 0.0
+
     def _analyze_pattern_evolution(self) -> Dict[str, Any]:
         """
         Analyze pattern evolution with quantum-inspired metrics and temporal coherence.

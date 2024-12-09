@@ -461,14 +461,16 @@ class LoRAGenerator(nn.Module):
                 'token_state': torch.randn(self.config.output_dim),
                 'params_change': {
                     'lora_r': torch.randn(self.config.lora_r, self.config.lora_r)
-                }
+                },
+                'score': 0.1  # Add initial score
             },
             {
                 'timestamp': time.time() + 1,
                 'token_state': torch.randn(self.config.output_dim),
                 'params_change': {
                     'lora_r': torch.randn(self.config.lora_r, self.config.lora_r)
-                }
+                },
+                'score': 0.5  # Add increasing score
             }
         ]
         
