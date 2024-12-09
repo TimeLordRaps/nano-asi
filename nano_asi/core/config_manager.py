@@ -19,7 +19,7 @@ class ConfigSource(BaseModel):
     priority: int = Field(default=0, description="Loading priority")
     required: bool = Field(default=True, description="Whether source is required")
 
-class ModularConfig:
+class ConfigManager:
     """Advanced configuration management with dynamic updates and validation."""
     
     def __init__(
