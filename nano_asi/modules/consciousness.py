@@ -155,6 +155,27 @@ class ConsciousnessTracker:
             insights.append(insight)
         return insights
     
+    def _compute_entanglement(self, activation: Dict[str, Any]) -> float:
+        """Compute quantum entanglement metric for neural activations."""
+        if 'values' not in activation and 'gradients' not in activation:
+            return 0.0
+        
+        values = activation.get('values', activation.get('gradients', []))
+        
+        if not isinstance(values, torch.Tensor):
+            values = torch.tensor(values, dtype=torch.float32)
+        
+        # Flatten and normalize tensor
+        values = values.flatten()
+        
+        # Compute correlation matrix
+        correlation_matrix = torch.corrcoef(values.unsqueeze(0))
+        
+        # Compute entanglement as the average absolute correlation
+        entanglement = torch.mean(torch.abs(correlation_matrix)).item()
+        
+        return float(entanglement)
+
     def _compute_activation_stats(self, activation: Dict[str, Any]) -> Dict[str, float]:
         """Compute advanced quantum-inspired statistics for neural activations."""
         if isinstance(activation.get('values'), (list, np.ndarray, torch.Tensor)):
@@ -214,10 +235,26 @@ class ConsciousnessTracker:
     
     def _compute_quantum_entropy(self, values: torch.Tensor) -> float:
         """Compute quantum-inspired entropy measure."""
-        # Quantum entropy based on eigenvalue distribution
-        eigenvalues, _ = torch.linalg.eigh(values.float() + 1e-10 * torch.eye(values.shape[0]))
+        # Flatten and ensure 2D tensor
+        if values.ndim > 2:
+            values = values.flatten(start_dim=1)
+        
+        # Ensure square matrix for eigenvalue computation
+        if values.shape[0] != values.shape[1]:
+            # Use covariance matrix if not square
+            values = torch.cov(values.T)
+        
+        # Add small identity matrix to ensure positive definiteness
+        values = values.float() + 1e-10 * torch.eye(values.shape[0], device=values.device)
+        
+        # Compute eigenvalues
+        eigenvalues, _ = torch.linalg.eigh(values)
+        
+        # Compute entropy using eigenvalue distribution
         probabilities = F.softmax(eigenvalues, dim=0)
-        return float(-torch.sum(probabilities * torch.log2(probabilities + 1e-10)))
+        entropy = -torch.sum(probabilities * torch.log2(probabilities + 1e-10))
+        
+        return float(entropy)
     
     def _compute_information_complexity(self, values: torch.Tensor) -> float:
         """Compute information complexity using compression ratio."""
