@@ -461,14 +461,9 @@ class LoRAGenerator(nn.Module):
         # Explicitly add activation_patterns to flow_data
         flow_data['activation_patterns'] = activation_patterns
         
-        # Add quantum_resonance with fallback to random generation
-        try:
-            # Try to use config's lora_r if available
-            quantum_resonance = torch.rand(self.config.lora_r).tolist()
-        except (AttributeError, TypeError):
-            # Fallback to a fixed-length random list if config is not available
-            quantum_resonance = torch.rand(64).tolist()
-        
+        # Always add quantum_resonance, using hyperparameters if available
+        lora_r = flow_data.get('hyperparameters', {}).get('lora_r', 64)
+        quantum_resonance = torch.rand(lora_r).tolist()
         flow_data['quantum_resonance'] = quantum_resonance
         
         # Track pattern evolution
