@@ -372,32 +372,30 @@ class ConsciousnessTracker:
         from scipy.stats import kurtosis
         return float(kurtosis(values.numpy()))
     
-    def _compute_temporal_stability(self, states: List[ConsciousnessState]) -> float:
-        """Compute temporal stability across consciousness states."""
-        if len(states) < 2:
-            return 1.0
-            
-        # Extract activation values from states
-        activation_values = []
-        for state in states:
-            if state.activation_patterns:
-                values = state.activation_patterns[0].get('values', [])
+    def _compute_temporal_stability(self, values: torch.Tensor) -> float:
+        """Compute temporal stability for activation values."""
+        try:
+            if not isinstance(values, torch.Tensor):
                 if isinstance(values, (list, np.ndarray)):
                     values = torch.tensor(values, dtype=torch.float32)
-                activation_values.append(values)
-        
-        if not activation_values:
-            return 1.0
+                else:
+                    return 1.0
+
+            # Ensure values are flattened
+            values = values.flatten()
             
-        # Convert to tensor and compute stability
-        try:
-            values_tensor = torch.stack(activation_values)
-            mean_stability = float(values_tensor.mean())
-            std_stability = float(values_tensor.std())
+            if len(values) == 0:
+                return 1.0
+
+            # Compute stability metrics
+            mean_stability = float(values.mean())
+            std_stability = float(values.std())
             
-            # Compute stability score
-            stability_score = 1.0 - (std_stability / (mean_stability + 1e-10))
-            return max(0.0, min(1.0, stability_score))
+            # Compute normalized stability score
+            stability_score = 1.0 - (std_stability / (abs(mean_stability) + 1e-10))
+            
+            # Ensure score is in valid range
+            return float(max(0.0, min(1.0, stability_score)))
             
         except Exception:
             return 1.0

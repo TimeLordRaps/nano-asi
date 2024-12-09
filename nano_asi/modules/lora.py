@@ -328,11 +328,12 @@ class LoRAGenerator(nn.Module):
         if len(conditional_tokens) == 0:
             raise ValueError("Conditional tokens cannot be empty")
             
-        # Generate base parameters
+        # Generate base parameters with correct shapes
         params = {
-            'lora_r': torch.randn(self.config.lora_r, self.config.lora_r),
+            'lora_r': torch.randn(self.config.input_dim, self.config.output_dim),
             'lora_alpha': torch.tensor(self.config.lora_alpha, dtype=torch.float32),
-            'lora_dropout': torch.tensor(self.config.lora_dropout, dtype=torch.float32)
+            'lora_dropout': torch.tensor(self.config.lora_dropout, dtype=torch.float32),
+            'weight_matrix': torch.randn(self.config.hidden_dim, self.config.output_dim)
         }
         
         # Track consciousness flow if tracker is provided
