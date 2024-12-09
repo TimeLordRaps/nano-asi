@@ -20,7 +20,7 @@ NanoASI is a user-friendly framework for building recursive self-improving AI sy
 ### Installation
 
 ```bash
-pip install nano-asi
+pip install nano_asi
 ```
 
 ### Basic Usage
@@ -40,7 +40,7 @@ Run nano-asi directly in Google Colab:
 
 ```python
 # Run setup script
-!wget https://raw.githubusercontent.com/nanoasi/nano-asi/main/colab_setup.py
+!wget https://raw.githubusercontent.com/TimeLordRaps/nano_asi/main/colab_setup.py
 !python colab_setup.py
 
 # Now you can use nano-asi
@@ -130,13 +130,13 @@ launch_ui()
 
 ```bash
 # Install development dependencies
-pip install nano-asi[dev]
+pip install nano_asi[dev]
 
 # Run tests
 pytest
 
 # Build documentation
-pip install nano-asi[docs]
+pip install nano_asi[docs]
 cd docs && make html
 ```
 
