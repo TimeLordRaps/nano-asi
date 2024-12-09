@@ -331,7 +331,7 @@ class LoRAGenerator(nn.Module):
         
         # Create params with specific shapes
         params = {
-            'lora_r': torch.randn(self.config.lora_r),
+            'lora_r': torch.randn(self.config.lora_r, self.config.lora_r),
             'lora_alpha': torch.tensor(self.config.lora_alpha),
             'lora_dropout': torch.tensor(self.config.lora_dropout)
         }
@@ -452,7 +452,7 @@ class LoRAGenerator(nn.Module):
                 'timestamp': time.time(),
                 'token_state': torch.randn(self.config.output_dim),
                 'params_change': {
-                    'lora_r': float(improved_adapter['params']['lora_r'])
+                    'lora_r': improved_lora_r  # Use the scalar value directly
                 }
             }
         ]

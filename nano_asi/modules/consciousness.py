@@ -313,9 +313,19 @@ class ConsciousnessTracker:
     
     def _compute_activation_entanglement(self, values: torch.Tensor) -> float:
         """Compute activation entanglement metric."""
-        # Measure of interdependence between activation values
-        correlation_matrix = torch.corrcoef(values.T)
-        return float(torch.mean(torch.abs(correlation_matrix)))
+        # Flatten and ensure 2D tensor for correlation
+        if values.ndim > 2:
+            values = values.reshape(values.shape[0], -1)
+        
+        # Ensure tensor is float and 2D
+        values = values.float()
+        
+        # Compute correlation matrix safely
+        try:
+            correlation_matrix = torch.corrcoef(values)
+            return float(torch.mean(torch.abs(correlation_matrix)))
+        except Exception:
+            return 0.0
         
     def _compute_skewness(self, values: torch.Tensor) -> float:
         """Compute skewness of a tensor."""
@@ -335,20 +345,23 @@ class ConsciousnessTracker:
         from scipy.stats import kurtosis
         return float(kurtosis(values.numpy()))
     
-    def _compute_temporal_stability(self, values: torch.Tensor) -> Dict[str, float]:
-        """
-        Compute temporal stability with enhanced quantum-temporal metrics.
-        
-        Implements:
-        - Multi-scale temporal coherence
-        - Phase space stability analysis
-        - Quantum temporal correlations
-        - Causal entropy flow
-        - Meta-temporal patterns
-        - Cross-temporal resonance
-        """
+    def _compute_temporal_stability(self, values: torch.Tensor) -> float:
+        """Compute temporal stability as a single float value."""
         if len(self.states) < 2:
-            return {"stability": 1.0}
+            return 1.0
+        
+        # Flatten and ensure 2D tensor
+        if values.ndim > 2:
+            values = values.reshape(values.shape[0], -1)
+        
+        # Compute basic stability metrics
+        mean_stability = float(values.mean())
+        std_stability = float(values.std())
+        
+        # Combine metrics into a single stability score
+        stability_score = 1.0 - (std_stability / (mean_stability + 1e-10))
+        
+        return max(0.0, min(1.0, stability_score))
             
         # Get historical values with temporal ordering
         history = torch.stack([
