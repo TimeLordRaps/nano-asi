@@ -322,14 +322,10 @@ class LoRAGenerator(nn.Module):
         conditional_tokens: Optional[torch.Tensor] = None,
         consciousness_tracker: Optional[Any] = None
     ) -> Dict[str, Any]:
-        """Generate LoRA adapter with optional consciousness integration."""
         if conditional_tokens is None:
             raise ValueError("Conditional tokens must be provided")
-            
-        if conditional_tokens.numel() == 0:
-            raise ValueError("Tokens cannot be empty")
         
-        # Create params with specific shapes
+        # Ensure params have the correct shape
         params = {
             'lora_r': torch.randn(self.config.lora_r, self.config.lora_r),
             'lora_alpha': torch.tensor(self.config.lora_alpha, dtype=torch.float32),
