@@ -563,11 +563,6 @@ class LoRAGenerator(nn.Module):
         })
         
         return flow_data
-            'patterns': flow_data,
-            'effectiveness': self._evaluate_effectiveness()
-        })
-        
-        return flow_data
     
     def _evaluate_effectiveness(self) -> Dict[str, float]:
         """Evaluate effectiveness with temporal ROI analysis."""
