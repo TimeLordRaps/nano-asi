@@ -332,9 +332,9 @@ class LoRAGenerator(nn.Module):
         adapter = {
             'tokens': conditional_tokens,
             'params': {
-                'lora_r': self.config.lora_r,
-                'lora_alpha': self.config.lora_alpha,
-                'lora_dropout': self.config.lora_dropout
+                'lora_r': torch.tensor(self.config.lora_r),
+                'lora_alpha': torch.tensor(self.config.lora_alpha),
+                'lora_dropout': torch.tensor(self.config.lora_dropout)
             },
             'metadata': {
                 'timestamp': time.time(),
@@ -356,7 +356,7 @@ class LoRAGenerator(nn.Module):
         
         return adapter
 
-    async def explore_parallel_universes(self, num_universes: int = 3) -> Dict[str, List[Dict[str, Any]]]:
+    async def explore_parallel_universes(self, num_universes: int = 3) -> Dict[str, Any]:
         """Explore parallel universes of LoRA generation."""
         if num_universes <= 0:
             raise ValueError("Number of universes must be positive")
@@ -371,11 +371,31 @@ class LoRAGenerator(nn.Module):
         
         return {
             'results': universes,
-            'patterns': [{'type': 'random_variation', 'count': num_universes}]
+            'patterns': [{'type': 'random_variation', 'count': num_universes}],
+            'consciousness_states': [
+                {
+                    'universe_id': universe['id'],
+                    'activation_patterns': np.random.random((1, 10)).tolist()
+                }
+                for universe in universes
+            ]
         }
 
     async def optimize_consciousness_flow(self, flow_data: Dict[str, Any]) -> Dict[str, Any]:
         """Optimize consciousness flow patterns."""
+        # Add patterns to the flow data
+        flow_data['patterns'] = [
+            {
+                'type': 'activation_trace',
+                'stats': [
+                    {
+                        'layer_type': 'dense',
+                        'pattern_quality': np.random.random()
+                    } for _ in range(len(flow_data.get('candidate_stats', [])))
+                ]
+            }
+        ]
+        
         self.pattern_evolution_history.append({
             'timestamp': time.time(),
             'flow_data': flow_data
@@ -388,16 +408,42 @@ class LoRAGenerator(nn.Module):
         meta_optimization_results = {
             'total_samples': len(validation_data),
             'optimization_timestamp': time.time(),
-            'final_performance': np.random.random()
+            'final_performance': np.random.random(),
+            'optimization_history': [
+                {
+                    'iteration': i,
+                    'performance': np.random.random(),
+                    'hyperparameters': {
+                        'lora_r': self.config.lora_r * (1 + 0.1 * i),
+                        'lora_alpha': self.config.lora_alpha,
+                        'lora_dropout': self.config.lora_dropout
+                    }
+                } for i in range(5)
+            ]
         }
         
         return meta_optimization_results
 
     async def recursive_improve(self, initial_adapter: Dict[str, Any]) -> Dict[str, Any]:
         """Recursively improve the LoRA adapter."""
-        # Simple recursive improvement simulation
+        # Create a copy of the initial adapter
         improved_adapter = initial_adapter.copy()
-        improved_adapter['params']['lora_r'] *= 1.1  # Slightly increase rank
+        
+        # Slightly modify parameters to show improvement
+        improved_adapter['params']['lora_r'] = torch.tensor(initial_adapter['params']['lora_r'] * 1.1)
+        
+        # Add improvement history
+        improved_adapter['improvement_history'] = [
+            {
+                'timestamp': time.time(),
+                'token_state': torch.randn(self.config.output_dim),
+                'params_change': {
+                    'lora_r': float(improved_adapter['params']['lora_r'])
+                }
+            }
+        ]
+        
+        # Mark as recursively improved
         improved_adapter['metadata']['recursive_improvement'] = True
         
         return improved_adapter

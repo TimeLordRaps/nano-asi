@@ -326,6 +326,24 @@ class ConsciousnessTracker:
         # Measure of interdependence between activation values
         correlation_matrix = torch.corrcoef(values.T)
         return float(torch.mean(torch.abs(correlation_matrix)))
+        
+    def _compute_skewness(self, values: torch.Tensor) -> float:
+        """Compute skewness of a tensor."""
+        # Ensure tensor is flattened
+        values = values.flatten().float()
+        
+        # Compute skewness using scipy for robustness
+        from scipy.stats import skew
+        return float(skew(values.numpy()))
+
+    def _compute_kurtosis(self, values: torch.Tensor) -> float:
+        """Compute kurtosis of a tensor."""
+        # Ensure tensor is flattened
+        values = values.flatten().float()
+        
+        # Compute kurtosis using scipy
+        from scipy.stats import kurtosis
+        return float(kurtosis(values.numpy()))
     
     def _compute_temporal_stability(self, values: torch.Tensor) -> Dict[str, float]:
         """
