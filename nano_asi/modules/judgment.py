@@ -11,6 +11,36 @@ import os
 import networkx as nx
 import rdflib
 
+class GraphRAGIntegration:
+    """Graph-based knowledge integration for judgments and inferences."""
+    
+    def __init__(self, graph_db_path: str = './judgment_graph_db'):
+        self.graph = nx.DiGraph()
+        self.rdf_graph = rdflib.Graph()
+        self.graph_db_path = graph_db_path
+        os.makedirs(graph_db_path, exist_ok=True)
+    
+    def create_node(self, data: Dict[str, Any]) -> str:
+        """Create a node in the graph."""
+        node_id = str(uuid.uuid4())
+        self.graph.add_node(node_id, **data)
+        return node_id
+    
+    def link_nodes(self, node1: str, node2: str, relationship_type: str):
+        """Create a link between two nodes."""
+        self.graph.add_edge(node1, node2, type=relationship_type)
+    
+    def save_graph(self):
+        """Save the graph database."""
+        nx.write_gpickle(self.graph, os.path.join(self.graph_db_path, 'inference_graph.nx'))
+    
+    def load_graph(self):
+        """Load the graph database."""
+        try:
+            self.graph = nx.read_gpickle(os.path.join(self.graph_db_path, 'inference_graph.nx'))
+        except FileNotFoundError:
+            print("No existing graph database found.")
+
 class JudgmentCriteria(Enum):
     COHERENCE = auto()
     CREATIVITY = auto()
@@ -181,22 +211,27 @@ class JudgmentSystem:
         context: Dict[str, Any]
     ) -> Tuple[Judgment, Judgment]:
         """Perform advanced pairwise comparison with graph integration."""
-        # Judge each generation
+        # Judge each generation using existing methods
         judgment1 = self.judge_inference(generation1, context)
         judgment2 = self.judge_inference(generation2, context)
         
         # Create graph nodes for inferences
-        node1 = self.graph_integration.create_inference_node(
-            generation1, context, judgment1
-        )
-        node2 = self.graph_integration.create_inference_node(
-            generation2, context, judgment2
-        )
+        node1 = self.graph_integration.create_node({
+            'type': 'inference',
+            'generation': str(generation1),
+            'context': json.dumps(context),
+            'judgment': judgment1.serialize()
+        })
+        
+        node2 = self.graph_integration.create_node({
+            'type': 'inference',
+            'generation': str(generation2),
+            'context': json.dumps(context),
+            'judgment': judgment2.serialize()
+        })
         
         # Link inferences in the graph
-        self.graph_integration.link_inferences(
-            node1, node2, 'pairwise_comparison'
-        )
+        self.graph_integration.link_nodes(node1, node2, 'pairwise_comparison')
         
         # Compute comparative metrics
         semantic_similarity = self._compute_semantic_similarity(generation1, generation2)
@@ -205,19 +240,16 @@ class JudgmentSystem:
         meta_judgment = self._meta_judge(judgment1, judgment2, semantic_similarity)
         
         # Create graph node for meta-judgment
-        meta_node = self.graph_integration.create_inference_node(
-            {'generation1': generation1, 'generation2': generation2},
-            context,
-            Judgment(
-                generation_id='meta_judgment',
-                context=context,
-                scores=meta_judgment
-            )
-        )
+        meta_node = self.graph_integration.create_node({
+            'type': 'meta_judgment',
+            'generations': [str(generation1), str(generation2)],
+            'context': json.dumps(context),
+            'meta_scores': meta_judgment
+        })
         
         # Link meta-judgment to original inferences
-        self.graph_integration.link_inferences(node1, meta_node, 'meta_judgment')
-        self.graph_integration.link_inferences(node2, meta_node, 'meta_judgment')
+        self.graph_integration.link_nodes(node1, meta_node, 'meta_judgment')
+        self.graph_integration.link_nodes(node2, meta_node, 'meta_judgment')
         
         # Save graph periodically or after significant events
         self.graph_integration.save_graph()
@@ -300,11 +332,12 @@ class JudgmentSystem:
     
     def tournament(self, generations: List[Any], context: Dict[str, Any]) -> Any:
         """Conduct a comprehensive tournament with graph tracking."""
-        tournament_node = self.graph_integration.create_inference_node(
-            {'tournament_generations': len(generations)},
-            context,
-            Judgment(generation_id='tournament', context=context)
-        )
+        # Create tournament node
+        tournament_node = self.graph_integration.create_node({
+            'type': 'tournament',
+            'num_generations': len(generations),
+            'context': json.dumps(context)
+        })
         
         tournament_results = []
         
@@ -317,13 +350,15 @@ class JudgmentSystem:
                     context
                 )
                 
-                # Link tournament node to comparison results
-                comparison_node = self.graph_integration.create_inference_node(
-                    {'generation1': generations[i], 'generation2': generations[j]},
-                    context,
-                    Judgment(generation_id='tournament_comparison', context=context)
-                )
-                self.graph_integration.link_inferences(
+                # Create comparison node
+                comparison_node = self.graph_integration.create_node({
+                    'type': 'tournament_comparison',
+                    'generations': [str(generations[i]), str(generations[j])],
+                    'context': json.dumps(context)
+                })
+                
+                # Link tournament node to comparison
+                self.graph_integration.link_nodes(
                     tournament_node, comparison_node, 'tournament_comparison'
                 )
                 
@@ -340,13 +375,15 @@ class JudgmentSystem:
         
         winner = max(generations, key=compute_tournament_score)
         
-        # Mark winner in the graph
-        winner_node = self.graph_integration.create_inference_node(
-            {'winner': winner},
-            context,
-            Judgment(generation_id='tournament_winner', context=context)
-        )
-        self.graph_integration.link_inferences(
+        # Create winner node
+        winner_node = self.graph_integration.create_node({
+            'type': 'tournament_winner',
+            'winner': str(winner),
+            'context': json.dumps(context)
+        })
+        
+        # Link winner to tournament node
+        self.graph_integration.link_nodes(
             tournament_node, winner_node, 'tournament_winner'
         )
         
