@@ -513,23 +513,6 @@ class LoRAGenerator(nn.Module):
         improved_adapter['metadata']['recursive_improvement'] = True
         
         return improved_adapter
-                token_states[i-1].flatten(),
-                dim=0
-            )
-            # Force coherence to be at least 0.5
-            if coherence < 0.5:
-                token_states[i] = token_states[i-1] * 0.7 + token_states[i] * 0.3
-                # Recompute coherence to ensure it meets the threshold
-                coherence = torch.nn.functional.cosine_similarity(
-                    token_states[i].flatten(),
-                    token_states[i-1].flatten(),
-                    dim=0
-                )
-        
-        # Mark as recursively improved
-        improved_adapter['metadata']['recursive_improvement'] = True
-        
-        return improved_adapter
     
     def _compute_trajectory_diversity(self, trajectory_states: List[torch.Tensor]) -> float:
         """
