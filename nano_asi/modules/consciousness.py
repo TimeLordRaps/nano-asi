@@ -770,6 +770,28 @@ class ConsciousnessTracker:
         total = sum(default_weights.values())
         return {k: v/total for k, v in default_weights.items()}
 
+    def _compute_quantum_weights(self, states: List[ConsciousnessState]) -> np.ndarray:
+        """Compute quantum-inspired weights for states."""
+        try:
+            # Extract quantum metrics
+            coherence_values = [
+                state.quantum_metrics.get('coherence', np.random.random()) 
+                for state in states
+            ]
+            
+            # Convert to numpy array and normalize
+            weights = np.array(coherence_values)
+            weights = (weights - weights.min()) / (weights.max() - weights.min() + 1e-10)
+            
+            # Ensure non-zero weights
+            weights = weights + 0.1
+            weights /= weights.sum()
+            
+            return weights
+        except Exception:
+            # Fallback to uniform weights
+            return np.ones(len(states)) / len(states)
+
     def _compute_meta_cognitive_score(self, state: ConsciousnessState) -> float:
         """Compute meta-cognitive score for a consciousness state."""
         try:
