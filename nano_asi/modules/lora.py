@@ -433,7 +433,7 @@ class LoRAGenerator(nn.Module):
                 } for _ in range(3)  # Generate 3 random consciousness states
             ]
         
-        # Explicitly extract activation_patterns from input data
+        # Explicitly extract activation_patterns
         activation_patterns = []
         for candidate in flow_data.get('candidate_stats', []):
             trace = candidate.get('activation_trace', {})
@@ -441,7 +441,7 @@ class LoRAGenerator(nn.Module):
             if layer_stats:
                 activation_patterns.append(layer_stats)
         
-        # If no patterns found in candidate_stats, use layer_stats from input
+        # If no patterns found, use layer_stats directly from candidates
         if not activation_patterns:
             for candidate in flow_data.get('candidate_stats', []):
                 layer_stats = candidate.get('layer_stats', {})
@@ -460,16 +460,23 @@ class LoRAGenerator(nn.Module):
         
         # Explicitly add activation_patterns to flow_data
         flow_data['activation_patterns'] = activation_patterns
-    
-        # Add quantum_resonance
-        flow_data['quantum_resonance'] = torch.rand(self.config.lora_r).tolist()
-    
+        
+        # Add quantum_resonance with fallback to random generation
+        try:
+            # Try to use config's lora_r if available
+            quantum_resonance = torch.rand(self.config.lora_r).tolist()
+        except (AttributeError, TypeError):
+            # Fallback to a fixed-length random list if config is not available
+            quantum_resonance = torch.rand(64).tolist()
+        
+        flow_data['quantum_resonance'] = quantum_resonance
+        
         # Track pattern evolution
         self.pattern_evolution_history.append({
             'timestamp': time.time(),
             'flow_data': flow_data
         })
-    
+        
         return flow_data
 
     async def meta_optimize(self, validation_data: List[Dict[str, Any]]) -> Dict[str, Any]:
