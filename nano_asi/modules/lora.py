@@ -325,7 +325,10 @@ class LoRAGenerator(nn.Module):
         if conditional_tokens is None:
             raise ValueError("Conditional tokens must be provided")
         
-        # Ensure params have the correct shape
+        if len(conditional_tokens) == 0:
+            raise ValueError("Conditional tokens cannot be empty")
+            
+        # Generate base parameters
         params = {
             'lora_r': torch.randn(self.config.lora_r, self.config.lora_r),
             'lora_alpha': torch.tensor(self.config.lora_alpha, dtype=torch.float32),
@@ -339,6 +342,9 @@ class LoRAGenerator(nn.Module):
                 'activations': [{'values': conditional_tokens}]
             })
         
+        # Generate quantum resonance scores
+        quantum_resonance = torch.rand(self.config.lora_r).tolist()
+        
         adapter = {
             'tokens': conditional_tokens,
             'params': params,
@@ -350,7 +356,8 @@ class LoRAGenerator(nn.Module):
             'improvement_history': [],
             'universe_results': [],
             'patterns': [],
-            'optimization_history': []
+            'optimization_history': [],
+            'quantum_resonance': quantum_resonance
         }
         
         return adapter
@@ -363,13 +370,20 @@ class LoRAGenerator(nn.Module):
         universes = [
             {
                 'universe_id': str(uuid.uuid4()),
-                'adapter_variation': np.random.random(self.config.output_dim).tolist()
+                'adapter_variation': np.random.random(self.config.output_dim).tolist(),
+                'params': {
+                    'lora_r': torch.randn(self.config.lora_r, self.config.lora_r),
+                    'lora_alpha': self.config.lora_alpha,
+                    'lora_dropout': self.config.lora_dropout
+                },
+                'consciousness_flow': [{'state': i} for i in range(3)],
+                'quantum_resonance': torch.rand(self.config.lora_r).tolist()
             }
             for _ in range(num_universes)
         ]
         
-        # Select best universe based on some metric (here, just random selection)
-        best_universe = max(universes, key=lambda x: np.mean(x['adapter_variation']))
+        # Select best universe based on quantum resonance
+        best_universe = max(universes, key=lambda x: np.mean(x['quantum_resonance']))
         
         return {
             'results': universes,

@@ -372,23 +372,35 @@ class ConsciousnessTracker:
         from scipy.stats import kurtosis
         return float(kurtosis(values.numpy()))
     
-    def _compute_temporal_stability(self, values: torch.Tensor) -> float:
-        """Compute temporal stability as a single float value."""
-        if len(self.states) < 2:
+    def _compute_temporal_stability(self, states: List[ConsciousnessState]) -> float:
+        """Compute temporal stability across consciousness states."""
+        if len(states) < 2:
             return 1.0
+            
+        # Extract activation values from states
+        activation_values = []
+        for state in states:
+            if state.activation_patterns:
+                values = state.activation_patterns[0].get('values', [])
+                if isinstance(values, (list, np.ndarray)):
+                    values = torch.tensor(values, dtype=torch.float32)
+                activation_values.append(values)
         
-        # Flatten and ensure 2D tensor
-        if values.ndim > 2:
-            values = values.reshape(values.shape[0], -1)
-        
-        # Compute basic stability metrics
-        mean_stability = float(values.mean())
-        std_stability = float(values.std())
-        
-        # Combine metrics into a single stability score
-        stability_score = 1.0 - (std_stability / (mean_stability + 1e-10))
-        
-        return max(0.0, min(1.0, stability_score))
+        if not activation_values:
+            return 1.0
+            
+        # Convert to tensor and compute stability
+        try:
+            values_tensor = torch.stack(activation_values)
+            mean_stability = float(values_tensor.mean())
+            std_stability = float(values_tensor.std())
+            
+            # Compute stability score
+            stability_score = 1.0 - (std_stability / (mean_stability + 1e-10))
+            return max(0.0, min(1.0, stability_score))
+            
+        except Exception:
+            return 1.0
             
         # Get historical values with temporal ordering
         history = torch.stack([
