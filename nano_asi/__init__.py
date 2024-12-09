@@ -1,11 +1,11 @@
 """Module exports for NanoASI components."""
 
-from .consciousness import ConsciousnessTracker
-from .lora import LoRAGenerator
-from .mcts import MCTSEngine
-from .judgment import JudgmentSystem
-from .universe import UniverseExplorer
-from .synthetic import SyntheticDataGenerator
+from .modules.consciousness import ConsciousnessTracker
+from .modules.lora import LoRAGenerator
+from .modules.mcts import MCTSEngine
+from .modules.judgment import JudgmentSystem
+from .modules.universe import UniverseExplorer
+from .modules.synthetic import SyntheticDataGenerator
 
 __all__ = [
     "ConsciousnessTracker",
