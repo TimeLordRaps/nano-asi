@@ -31,7 +31,8 @@ from ..modules import (
     MCTSEngine,
     JudgmentSystem,
     UniverseExplorer,
-    SyntheticDataGenerator
+    SyntheticDataGenerator,
+    GraphRAGModule
 )
 
 # Import Dataset type
