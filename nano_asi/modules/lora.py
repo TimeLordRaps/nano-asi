@@ -749,6 +749,34 @@ class LoRAGenerator(nn.Module):
                 } for _ in range(3)  # Generate 3 random consciousness states
             ]
         
+        # Explicitly extract activation_patterns from input data
+        activation_patterns = []
+        for candidate in flow_data.get('candidate_stats', []):
+            trace = candidate.get('activation_trace', {})
+            layer_stats = trace.get('layer_stats', {})
+            if layer_stats:
+                activation_patterns.append(layer_stats)
+        
+        # If no patterns found in candidate_stats, use layer_stats from input
+        if not activation_patterns:
+            for candidate in flow_data.get('candidate_stats', []):
+                layer_stats = candidate.get('layer_stats', {})
+                if layer_stats:
+                    activation_patterns.append(layer_stats)
+        
+        # If still no patterns, generate random patterns
+        if not activation_patterns:
+            activation_patterns = [
+                {
+                    'mean': np.random.random(),
+                    'std': np.random.random(),
+                    'layer_type': 'dense'
+                } for _ in range(3)
+            ]
+        
+        # Explicitly add activation_patterns to flow_data
+        flow_data['activation_patterns'] = activation_patterns
+        
         # Track pattern evolution
         self.pattern_evolution_history.append({
             'timestamp': time.time(),
