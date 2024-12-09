@@ -460,13 +460,16 @@ class LoRAGenerator(nn.Module):
         
         # Explicitly add activation_patterns to flow_data
         flow_data['activation_patterns'] = activation_patterns
-        
+    
+        # Add quantum_resonance
+        flow_data['quantum_resonance'] = torch.rand(self.config.lora_r).tolist()
+    
         # Track pattern evolution
         self.pattern_evolution_history.append({
             'timestamp': time.time(),
             'flow_data': flow_data
         })
-        
+    
         return flow_data
 
     async def meta_optimize(self, validation_data: List[Dict[str, Any]]) -> Dict[str, Any]:
