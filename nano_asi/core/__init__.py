@@ -6,7 +6,7 @@ from .architecture import ComponentProtocol, ComponentRegistry
 from .config_manager import ConfigManager
 from .dependency_injection import DependencyContainer, inject
 from .interfaces import (
-    ComponentInterface,
+    ComponentProtocol,
     ModelAdapterProtocol,
     JudgmentProtocol,
     ComponentConfig
@@ -20,8 +20,8 @@ __all__ = [
     "ConfigManager",
     "DependencyContainer",
     "inject",
-    "ComponentInterface",
-    "ModelAdapterProtocol", 
+    "ComponentProtocol",
+    "ModelAdapterProtocol",
     "JudgmentProtocol",
     "ComponentConfig"
 ]
