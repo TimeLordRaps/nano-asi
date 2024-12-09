@@ -1,13 +1,5 @@
 """Core modules for the NanoASI framework."""
 
-from .consciousness import ConsciousnessTracker
-from .lora import LoRAGenerator
-from .mcts import MCTSEngine
-from .judgment import JudgmentSystem
-from .universe import UniverseExplorer
-from .synthetic import SyntheticDataGenerator
-from .graph_rag import GraphRAGModule
-
 __all__ = [
     "ConsciousnessTracker",
     "LoRAGenerator", 
@@ -17,3 +9,32 @@ __all__ = [
     "SyntheticDataGenerator",
     "GraphRAGModule"
 ]
+
+# Use lazy imports to break circular dependency
+def ConsciousnessTracker():
+    from .consciousness import ConsciousnessTracker
+    return ConsciousnessTracker()
+
+def LoRAGenerator():
+    from .lora import LoRAGenerator
+    return LoRAGenerator()
+
+def MCTSEngine():
+    from .mcts import MCTSEngine
+    return MCTSEngine()
+
+def JudgmentSystem():
+    from .judgment import JudgmentSystem
+    return JudgmentSystem()
+
+def UniverseExplorer():
+    from .universe import UniverseExplorer
+    return UniverseExplorer()
+
+def SyntheticDataGenerator():
+    from .synthetic import SyntheticDataGenerator
+    return SyntheticDataGenerator()
+
+def GraphRAGModule():
+    from .graph_rag import GraphRAGModule
+    return GraphRAGModule()

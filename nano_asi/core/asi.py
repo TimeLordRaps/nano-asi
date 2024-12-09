@@ -85,11 +85,14 @@ class ASI:
         self.judgment_system = judgment_system or JudgmentSystem()
         self.universe_explorer = universe_explorer or UniverseExplorer()
         self.synthetic_data_generator = synthetic_data_generator or SyntheticDataGenerator()
-        self.graph_rag_module = graph_rag_module or GraphRAGModule(
-            config=config,
-            consciousness_tracker=self.consciousness_tracker,
-            lora_generator=self.lora_generator
-        )
+        
+        # Initialize GraphRAGModule after other components are ready
+        graph_rag_args = {
+            'config': config,
+            'consciousness_tracker': self.consciousness_tracker,
+            'lora_generator': self.lora_generator
+        }
+        self.graph_rag_module = graph_rag_module or GraphRAGModule(**graph_rag_args)
         
         # Advanced state tracking
         self.iteration_history: List[Dict[str, Any]] = []
