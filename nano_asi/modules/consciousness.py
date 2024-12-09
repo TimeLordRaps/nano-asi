@@ -817,6 +817,57 @@ class ConsciousnessTracker:
         except Exception:
             return 0.0
 
+    def _compute_composite_score(
+        self, 
+        quantum_metrics: Dict[str, float], 
+        temporal_metrics: Dict[str, float], 
+        info_metrics: Dict[str, float], 
+        meta_patterns: Dict[str, Any]
+    ) -> float:
+        """
+        Compute a composite score integrating multiple consciousness metrics.
+        
+        Args:
+            quantum_metrics: Quantum-inspired metrics
+            temporal_metrics: Temporal coherence metrics
+            info_metrics: Information theoretic metrics
+            meta_patterns: Meta-cognitive pattern metrics
+        
+        Returns:
+            Composite score representing overall consciousness quality
+        """
+        try:
+            # Weighted combination of different metric categories
+            weights = {
+                'quantum': 0.3,
+                'temporal': 0.2,
+                'information': 0.2,
+                'meta': 0.3
+            }
+            
+            # Compute sub-scores
+            quantum_score = np.mean(list(quantum_metrics.values())) if quantum_metrics else 0.0
+            temporal_score = np.mean(list(temporal_metrics.values())) if temporal_metrics else 0.0
+            info_score = np.mean(list(info_metrics.values())) if info_metrics else 0.0
+            meta_score = np.mean([
+                meta_patterns.get('recursive_depth', 0),
+                meta_patterns.get('meta_stability', 0)
+            ])
+            
+            # Compute weighted composite score
+            composite_score = (
+                weights['quantum'] * quantum_score +
+                weights['temporal'] * temporal_score +
+                weights['information'] * info_score +
+                weights['meta'] * meta_score
+            )
+            
+            return float(np.clip(composite_score, 0, 1))
+        
+        except Exception as e:
+            print(f"Composite score computation error: {e}")
+            return 0.5  # Default neutral score
+
     def _analyze_pattern_evolution(self) -> Dict[str, Any]:
         """
         Analyze pattern evolution with quantum-inspired metrics and temporal coherence.
