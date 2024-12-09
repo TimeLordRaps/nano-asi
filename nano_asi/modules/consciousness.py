@@ -225,6 +225,36 @@ class ConsciousnessTracker:
         original_size = len(values)
         return float(compressed_size / original_size)
     
+    def _quantum_normalize(self, values: Dict[str, Any]) -> torch.Tensor:
+        """
+        Quantum-inspired normalization of activation values.
+        
+        Args:
+            values: Dictionary containing activation values
+        
+        Returns:
+            Normalized tensor with quantum-inspired preprocessing
+        """
+        # Extract gradients if present
+        if isinstance(values, dict) and 'gradients' in values:
+            values_tensor = torch.tensor(values['gradients'], dtype=torch.float32)
+        elif isinstance(values, torch.Tensor):
+            values_tensor = values
+        else:
+            raise ValueError("Invalid input for quantum normalization")
+        
+        # Flatten tensor if multi-dimensional
+        values_tensor = values_tensor.flatten()
+        
+        # Quantum-inspired normalization
+        # 1. Normalize to zero mean and unit variance
+        normalized = (values_tensor - values_tensor.mean()) / (values_tensor.std() + 1e-10)
+        
+        # 2. Apply quantum-inspired scaling
+        quantum_scaling = torch.tanh(normalized)
+        
+        return quantum_scaling
+
     def _compute_quantum_coherence(self, values: torch.Tensor) -> Dict[str, float]:
         """
         Compute quantum-inspired coherence metrics with enhanced temporal awareness.
