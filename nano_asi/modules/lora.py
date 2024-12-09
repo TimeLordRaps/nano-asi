@@ -8,6 +8,7 @@ import torch.nn.functional as F
 from diffusers import DDPMScheduler
 import time
 import numpy as np
+import uuid
 from collections import defaultdict
 
 # Import MAX_SEQ_LENGTH from core configuration
