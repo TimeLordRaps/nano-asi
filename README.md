@@ -1,6 +1,6 @@
-# WIP: Will be an open-webui aider unsloth recursive self-improvement framework.
-
 # 🧠 NanoASI: Advanced Recursive Self-Improving AI Framework
+
+*An open framework for building recursive self-improving AI systems*
 
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL3.0-yellow.svg)](https://github.com/TimeLordRaps/nano-asi/blob/main/LICENSE)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
@@ -119,10 +119,12 @@ launch_ui()
 
 ## 📚 Documentation
 
-- [Quick Start Guide](https://github.com/TimeLordRaps/nano-asi/wiki/Quickstart)
-- [Tutorial Notebooks](https://github.com/TimeLordRaps/nano-asi/wiki/Tutorials)
-- [API Reference](https://github.com/TimeLordRaps/nano-asi/wiki/API)
-- [Advanced Topics](https://github.com/TimeLordRaps/nano-asi/wiki/Advanced)
+- [Quick Start Guide](https://github.com/TimeLordRaps/nano-asi/wiki/Quickstart) - Get up and running in minutes
+- [Tutorials](https://github.com/TimeLordRaps/nano-asi/wiki/Tutorials) - Step-by-step guides with notebooks
+- [API Reference](https://github.com/TimeLordRaps/nano-asi/wiki/API) - Detailed technical documentation with examples
+- [Advanced Topics](https://github.com/TimeLordRaps/nano-asi/wiki/Advanced) - Deep dives into theory and implementation
+- [Best Practices](https://github.com/TimeLordRaps/nano-asi/wiki/Best-Practices) - Guidelines and recommendations
+- [Troubleshooting](https://github.com/TimeLordRaps/nano-asi/wiki/Troubleshooting) - Common issues and solutions
 
 ## 🛠️ Development
 
