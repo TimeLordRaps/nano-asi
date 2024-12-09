@@ -659,6 +659,67 @@ class ConsciousnessTracker:
         except Exception:
             return 0.0
 
+    def _compute_recursive_depth(self, states: List[ConsciousnessState]) -> int:
+        """Compute the recursive depth of consciousness states."""
+        try:
+            # Analyze meta-insights and thought chains for recursive complexity
+            depths = [
+                len(state.meta_insights) + len(state.thought_chains)
+                for state in states
+            ]
+            return max(depths) if depths else 0
+        except Exception:
+            return 0
+
+    def _compute_meta_stability(self, states: List[ConsciousnessState]) -> float:
+        """Compute meta-stability across consciousness states."""
+        try:
+            # Compute stability of meta-insights and thought chains
+            meta_complexities = [
+                len(state.meta_insights) * len(state.thought_chains)
+                for state in states
+            ]
+            return float(np.std(meta_complexities)) if len(meta_complexities) > 1 else 0.0
+        except Exception:
+            return 0.0
+
+    def _analyze_pattern_hierarchy(self, states: List[ConsciousnessState]) -> Dict[str, Any]:
+        """Analyze hierarchical patterns in consciousness states."""
+        try:
+            # Compute pattern hierarchy metrics
+            hierarchy_metrics = {
+                'depth_variation': np.std([
+                    len(state.meta_insights) 
+                    for state in states
+                ]),
+                'complexity_distribution': [
+                    len(state.meta_insights) * len(state.thought_chains)
+                    for state in states
+                ]
+            }
+            return hierarchy_metrics
+        except Exception:
+            return {}
+
+    def _analyze_consciousness_flow(self, states: List[ConsciousnessState]) -> Dict[str, Any]:
+        """Analyze the flow of consciousness across states."""
+        try:
+            # Compute flow metrics
+            flow_metrics = {
+                'state_transitions': len(states),
+                'meta_insight_evolution': [
+                    len(state.meta_insights) 
+                    for state in states
+                ],
+                'thought_chain_dynamics': [
+                    len(state.thought_chains)
+                    for state in states
+                ]
+            }
+            return flow_metrics
+        except Exception:
+            return {}
+
     def _analyze_pattern_evolution(self) -> Dict[str, Any]:
         """
         Analyze pattern evolution with quantum-inspired metrics and temporal coherence.

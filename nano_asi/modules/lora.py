@@ -405,19 +405,21 @@ class LoRAGenerator(nn.Module):
 
     async def optimize_consciousness_flow(self, flow_data: Dict[str, Any]) -> Dict[str, Any]:
         """Optimize consciousness flow patterns."""
-        # Add patterns to the flow data
+        # Ensure patterns are added
         flow_data['patterns'] = [
             {
                 'type': 'activation_trace',
                 'stats': [
                     {
                         'layer_type': 'dense',
-                        'pattern_quality': np.random.random()
-                    } for _ in range(len(flow_data.get('candidate_stats', [])))
+                        'pattern_quality': np.random.random(),
+                        'layer_stats': candidate.get('activation_trace', {}).get('layer_stats', {})
+                    } for candidate in flow_data.get('candidate_stats', [])
                 ]
             }
         ]
         
+        # Track pattern evolution
         self.pattern_evolution_history.append({
             'timestamp': time.time(),
             'flow_data': flow_data
