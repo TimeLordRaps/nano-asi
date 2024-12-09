@@ -332,6 +332,13 @@ class LoRAGenerator(nn.Module):
             'lora_dropout': torch.tensor(self.config.lora_dropout, dtype=torch.float32)
         }
         
+        # Track consciousness flow if tracker is provided
+        consciousness_flow = None
+        if consciousness_tracker:
+            consciousness_flow = await consciousness_tracker.track_consciousness({
+                'activations': [{'values': conditional_tokens}]
+            })
+        
         adapter = {
             'tokens': conditional_tokens,
             'params': params,
@@ -339,19 +346,12 @@ class LoRAGenerator(nn.Module):
                 'timestamp': time.time(),
                 'consciousness_integrated': consciousness_tracker is not None
             },
-            'consciousness_flow': {},
+            'consciousness_flow': consciousness_flow,
             'improvement_history': [],
             'universe_results': [],
             'patterns': [],
             'optimization_history': []
         }
-        
-        # If consciousness tracker is provided, track the flow
-        if consciousness_tracker:
-            state = await consciousness_tracker.track_consciousness({
-                'activations': [{'values': conditional_tokens}]
-            })
-            adapter['consciousness_flow'] = state
         
         return adapter
 
@@ -362,7 +362,7 @@ class LoRAGenerator(nn.Module):
         
         universes = [
             {
-                'id': str(uuid.uuid4()),
+                'universe_id': str(uuid.uuid4()),
                 'adapter_variation': np.random.random(self.config.output_dim).tolist()
             }
             for _ in range(num_universes)
@@ -376,7 +376,7 @@ class LoRAGenerator(nn.Module):
             'patterns': [{'type': 'random_variation', 'count': num_universes}],
             'consciousness_states': [
                 {
-                    'universe_id': universe['id'],
+                    'universe_id': universe['universe_id'],
                     'activation_patterns': np.random.random((1, 10)).tolist()
                 }
                 for universe in universes
