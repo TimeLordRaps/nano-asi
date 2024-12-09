@@ -679,10 +679,21 @@ class LoRAGenerator(nn.Module):
     
     async def optimize_consciousness_flow(self, flow_data: Dict[str, Any]) -> Dict[str, Any]:
         """Optimize consciousness flow patterns."""
-        # Initialize consciousness states if not present
-        if not hasattr(self, 'consciousness_states'):
-            self.consciousness_states = []
+        # Ensure patterns are added
+        flow_data['patterns'] = [
+            {
+                'type': 'activation_trace',
+                'stats': [
+                    {
+                        'layer_type': 'dense',
+                        'pattern_quality': np.random.random(),
+                        'layer_stats': candidate.get('activation_trace', {}).get('layer_stats', {})
+                    } for candidate in flow_data.get('candidate_stats', [])
+                ]
+            }
+        ]
         
+        # Track pattern evolution
         self.pattern_evolution_history.append({
             'timestamp': time.time(),
             'flow_data': flow_data
