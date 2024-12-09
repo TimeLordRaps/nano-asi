@@ -94,8 +94,13 @@ class ConsciousnessTracker:
             for activation in state_data['activations']:
                 # Enhanced pattern analysis with quantum properties
                 quantum_stats = self._compute_quantum_stats(activation)
-                coherence = self._compute_quantum_coherence(activation)
-                entanglement = self._compute_entanglement(activation)
+                
+                # Ensure values exist, use gradients as fallback
+                values = activation.get('values', activation.get('gradients', []))
+                
+                # Compute metrics safely
+                coherence = self._compute_quantum_coherence(values) if len(values) > 0 else 0.0
+                entanglement = self._compute_entanglement(values) if len(values) > 0 else 0.0
                 
                 pattern = {
                     'layer_type': activation.get('layer_type'),
@@ -175,6 +180,26 @@ class ConsciousnessTracker:
         entanglement = torch.mean(torch.abs(correlation_matrix)).item()
         
         return float(entanglement)
+
+    def _compute_resonance(self, activation: Dict[str, Any]) -> float:
+        """Compute resonance score for an activation."""
+        try:
+            # Use gradients or values if available
+            values = activation.get('gradients', activation.get('values', []))
+            
+            if not isinstance(values, torch.Tensor):
+                values = torch.tensor(values, dtype=torch.float32)
+            
+            # Flatten and ensure 1D tensor
+            values = values.flatten()
+            
+            # Compute basic resonance as variance of normalized values
+            normalized = (values - values.mean()) / (values.std() + 1e-10)
+            resonance = float(torch.var(normalized))
+            
+            return max(0.0, min(1.0, resonance))
+        except Exception:
+            return 0.0
 
     def _compute_activation_stats(self, activation: Dict[str, Any]) -> Dict[str, float]:
         """Compute advanced quantum-inspired statistics for neural activations."""

@@ -332,8 +332,8 @@ class LoRAGenerator(nn.Module):
         # Create params with specific shapes
         params = {
             'lora_r': torch.randn(self.config.lora_r, self.config.lora_r),
-            'lora_alpha': torch.tensor(self.config.lora_alpha),
-            'lora_dropout': torch.tensor(self.config.lora_dropout)
+            'lora_alpha': torch.tensor(self.config.lora_alpha, dtype=torch.float32),
+            'lora_dropout': torch.tensor(self.config.lora_dropout, dtype=torch.float32)
         }
         
         adapter = {
@@ -437,11 +437,11 @@ class LoRAGenerator(nn.Module):
         improved_adapter = initial_adapter.copy()
         
         # Slightly modify parameters to show improvement
-        improved_lora_r = initial_adapter['params']['lora_r'] * 1.1
+        improved_lora_r = initial_adapter['params']['lora_r'].clone() * 1.1
         
         # Ensure a different tensor is created
         improved_adapter['params'] = {
-            'lora_r': torch.tensor(improved_lora_r, dtype=torch.float32),
+            'lora_r': improved_lora_r,
             'lora_alpha': initial_adapter['params']['lora_alpha'],
             'lora_dropout': initial_adapter['params']['lora_dropout']
         }
