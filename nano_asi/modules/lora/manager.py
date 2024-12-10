@@ -106,8 +106,10 @@ class LoRAManager:
         )
         
         # Use Unsloth for LoRA generation
+        # Remove any potential wildcard or invalid characters from model name
+        base_model = self.base_model.split('*')[0].strip()
         model, tokenizer = FastLanguageModel.from_pretrained(
-            model_name=self.base_model,
+            model_name=base_model,
             max_seq_length=2048,
             load_in_4bit=True
         )

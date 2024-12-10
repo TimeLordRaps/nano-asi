@@ -229,7 +229,7 @@ class LoRAGenerator:
     async def generate_lora_adapter(
         self, 
         conditional_tokens: Optional[torch.Tensor] = None,
-        base_model_name: str = "unsloth/Qwen2.5-Coder-0.5B-Instruct-bnb-4bit",
+        base_model_name: str = "unsloth/Qwen2.5-Coder-0.5B-Instruct-bnb-4bit".split('*')[0].strip(),
         consciousness_tracker: Optional[Any] = None
     ) -> Dict[str, Any]:
         """Generate a LoRA adapter with minimal configuration."""
@@ -238,6 +238,8 @@ class LoRAGenerator:
 
         # For testing, use a mock model if actual model download fails
         try:
+            # Remove any potential wildcard or invalid characters from model name
+            base_model_name = base_model_name.split('*')[0].strip()
             model, tokenizer = FastLanguageModel.from_pretrained(
                 model_name=base_model_name,
                 max_seq_length=self.max_seq_length,

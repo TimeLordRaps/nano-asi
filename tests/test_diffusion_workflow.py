@@ -58,7 +58,7 @@ class TestDiffusionWorkflow:
         # Generate test scenarios
         scenarios = test_suite.generate_test_scenarios(
             base_scenario={
-                'model_name': 'unsloth/Qwen2.5-Coder-0.5B-Instruct',
+                'model_name': 'unsloth/Qwen2.5-Coder-0.5B-Instruct'.split('*')[0].strip(),
                 'task': 'code_generation',
                 'complexity': 1.0
             },
