@@ -229,7 +229,10 @@ class HymbaAdapter(nn.Module):
             self.compute_budget = max(0.0, min(1.0, compute_budget))
         
         # Memory consolidation
-        consolidated_tokens = self.memory_consolidation_step(memory_tokens, present_tokens)
+        consolidated_tokens = self.memory_consolidation_step(
+            memory_tokens, 
+            present_tokens=coherence_tokens
+        )
         
         # Thinking steps with dynamic compute budget
         thinking_steps = int(self.compute_budget * 4)  # Max 4 thinking steps
@@ -237,9 +240,15 @@ class HymbaAdapter(nn.Module):
         for _ in range(thinking_steps):
             current_tokens = self.thinking_step(current_tokens)
         
+        # Prediction and planning tokens
+        prediction_tokens = self.prediction_layer(current_tokens)
+        planning_tokens = self.planning_layer(current_tokens)
+        
         return {
             'consolidated_tokens': consolidated_tokens,
-            'thinking_tokens': current_tokens
+            'thinking_tokens': current_tokens,
+            'prediction_tokens': prediction_tokens,
+            'planning_tokens': planning_tokens
         }
 import torch
 import torch.nn as nn
