@@ -6,10 +6,13 @@ import torch.nn as nn
 import torch.nn.functional as F
 import uuid
 import time
+import logging
 import numpy as np
 from unsloth import FastLanguageModel
 from nano_asi.core.config import Config
 from nano_asi.modules.lora.config import LoRAConfig
+from nano_asi.modules.consciousness.tracker import ConsciousnessTracker
+from nano_asi.modules.evaluation.benchmarks import EvaluationSuite
 from diffusers import DDPMScheduler
 
 
