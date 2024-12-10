@@ -3,21 +3,27 @@ import unsloth
 from typing import Dict, List, Any, Optional
 from unsloth import FastLanguageModel
 from nano_asi.modules.consciousness.tracker import ConsciousnessTracker
+from nano_asi.modules.lora.config import LoRAConfig
 
 class LoRAGenerator:
-    def __init__(self, config=None):
+    def __init__(self, config: Optional[LoRAConfig] = None):
         """
         Initialize LoRA Generator with Unsloth's FastLanguageModel.
         
         Args:
-            config (dict, optional): Configuration for LoRA generation. Defaults to None.
+            config (LoRAConfig, optional): Configuration for LoRA generation. Defaults to None.
         """
-        self.config = config or {}
+        # Use default configuration if not provided
+        self.config = config or LoRAConfig()
+        
+        # Extract hyperparameters from config
         self.hyperparameters = {
-            'lora_r': self.config.get('lora_r', 32),
-            'lora_alpha': self.config.get('lora_alpha', 64),
-            'lora_dropout': self.config.get('lora_dropout', 0.05),
+            'lora_r': getattr(self.config, 'lora_r', 32),
+            'lora_alpha': getattr(self.config, 'lora_alpha', 64),
+            'lora_dropout': getattr(self.config, 'lora_dropout', 0.05),
         }
+        
+        # Initialize tracking and meta-cognitive state
         self.pattern_evolution_history = []
         self.consciousness_flow = []
         self.meta_cognitive_state = {
@@ -26,7 +32,8 @@ class LoRAGenerator:
         }
 
         # Default model configuration
-        self.base_model_name = self.config.get(
+        self.base_model_name = getattr(
+            self.config, 
             'base_model_name', 
             'unsloth/Qwen2.5-Coder-0.5B-Instruct-bnb-4bit'
         )
