@@ -7,24 +7,19 @@ set output_file=combined_code.md
 REM Delete the output file if it exists
 if exist %output_file% del %output_file%
 
-REM Loop through all relevant files
-for /r %%f in (*.py) do (
-    REM Get the filename without the directory
-    set filename=%%~nxf
-    
-    REM Exclude __init__.py and files starting with a dot
-    if not "!filename!"=="__init__.py" (
-        if not "!filename:~0,1!"=="." (
-            echo Adding file: %%~f
-            REM Add filename separator
-            echo ================================================== >> %output_file%
-            echo File: %%~f >> %output_file%
-            echo ================================================== >> %output_file%
-            REM Add file content
-            type "%%f" >> %output_file%
-            echo. >> %output_file%
-        )
-    )
+REM Define core module paths
+set "core_modules=nano_asi\modules\consciousness\tracker.py nano_asi\modules\evaluation\benchmarks.py nano_asi\modules\judgement\base.py nano_asi\modules\judgement\criteria.py nano_asi\modules\judgement\strategies.py nano_asi\modules\mcts.py nano_asi\modules\mcts\advanced.py nano_asi\modules\mcts\base.py nano_asi\modules\mcts\nodes.py nano_asi\modules\mcts\states.py"
+
+REM Loop through core module paths
+for %%f in (%core_modules%) do (
+    echo Adding file: %%f
+    REM Add filename separator
+    echo ================================================== >> %output_file%
+    echo File: %%f >> %output_file%
+    echo ================================================== >> %output_file%
+    REM Add file content
+    type "%%f" >> %output_file%
+    echo. >> %output_file%
 )
 
-echo All files concatenated into %output_file%.
+echo Core nano-asi modules concatenated into %output_file%.
