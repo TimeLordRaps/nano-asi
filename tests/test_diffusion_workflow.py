@@ -13,6 +13,11 @@ class TestDiffusionWorkflow:
     """Test suite for end-to-end diffusion model training workflow."""
     
     @pytest.fixture
+    def device(self):
+        """Get the appropriate device (CUDA if available, else CPU)."""
+        return torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    @pytest.fixture
     def test_suite(self):
         return AdvancedTestSuite()
     

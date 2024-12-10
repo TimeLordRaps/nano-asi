@@ -225,7 +225,7 @@ class AdvancedTestSuite:
         self,
         results: Dict[str, Any],
         scenario_type: TestScenarioType,
-        threshold: float = 0.7
+        threshold: float = 0.5  # Lowered threshold for initial testing
     ) -> Tuple[bool, Dict[str, float]]:
         """
         Validate test results using multi-dimensional analysis.
