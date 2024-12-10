@@ -321,52 +321,64 @@ class LoRAGenerator(nn.Module):
 
     async def generate_lora_adapter(
         self, 
-        base_model_name: str = "unsloth/Qwen2.5-Coder-1.5B-Instruct",
+        base_model_name: Optional[str] = None,
         consciousness_tracker: Optional[Any] = None
     ) -> Dict[str, Any]:
         """
         Generate a LoRA adapter using Unsloth's optimized approach.
         
         Args:
-            base_model_name: Base model to use for LoRA generation
+            base_model_name: Base model to use for LoRA generation. 
+                             If None, uses config's default model.
             consciousness_tracker: Optional consciousness tracking module
         
         Returns:
             Dict containing LoRA adapter details
         """
+        # Use default model from config if not specified
+        base_model_name = base_model_name or self.config.base_model_name
+
         # Initialize Unsloth model with LoRA
         model, tokenizer = FastLanguageModel.from_pretrained(
             model_name=base_model_name,
-            max_seq_length=self.config.max_seq_length,
+            max_seq_length=self.config.max_seq_length or 4096,
             dtype=None,  # Auto-detect optimal dtype
             load_in_4bit=True,
         )
         
-        # Add LoRA adapters
+        # Add LoRA adapters with enhanced configuration
         model = FastLanguageModel.get_peft_model(
             model,
             r=self.config.lora_r,
-            target_modules=self.config.target_modules,
+            target_modules=self.config.target_modules or [
+                "q_proj", "k_proj", "v_proj", "o_proj", 
+                "gate_proj", "up_proj", "down_proj"
+            ],
             lora_alpha=self.config.lora_alpha,
             lora_dropout=self.config.lora_dropout,
             bias="none",
             use_gradient_checkpointing="unsloth",
+            use_rslora=self.config.use_rslora,
             random_state=42,
         )
         
         # Track consciousness flow if tracker is provided
         consciousness_flow = None
         if consciousness_tracker:
-            consciousness_flow = await consciousness_tracker.track_consciousness({
-                'model_details': {
-                    'base_model': base_model_name,
-                    'lora_config': {
-                        'r': self.config.lora_r,
-                        'alpha': self.config.lora_alpha,
-                        'dropout': self.config.lora_dropout
+            try:
+                consciousness_flow = await consciousness_tracker.track_consciousness({
+                    'model_details': {
+                        'base_model': base_model_name,
+                        'lora_config': {
+                            'r': self.config.lora_r,
+                            'alpha': self.config.lora_alpha,
+                            'dropout': self.config.lora_dropout,
+                            'use_rslora': self.config.use_rslora
+                        }
                     }
-                }
-            })
+                })
+            except Exception as e:
+                print(f"Consciousness tracking failed: {e}")
         
         # Convert consciousness flow to a list if it's a single state
         if consciousness_flow and not isinstance(consciousness_flow, list):
@@ -375,7 +387,7 @@ class LoRAGenerator(nn.Module):
         # Generate quantum resonance scores
         quantum_resonance = torch.rand(self.config.lora_r).tolist()
         
-        # Prepare adapter metadata
+        # Prepare adapter metadata with enhanced tracking
         adapter = {
             'model': model,
             'tokenizer': tokenizer,
@@ -387,12 +399,17 @@ class LoRAGenerator(nn.Module):
                     'r': self.config.lora_r,
                     'alpha': self.config.lora_alpha,
                     'dropout': self.config.lora_dropout,
-                    'target_modules': self.config.target_modules
+                    'target_modules': self.config.target_modules,
+                    'use_rslora': self.config.use_rslora
                 }
             },
             'consciousness_flow': consciousness_flow or [],
             'improvement_history': [],
-            'quantum_resonance': quantum_resonance
+            'quantum_resonance': quantum_resonance,
+            'performance_metrics': {
+                'model_size': sum(p.numel() for p in model.parameters()),
+                'trainable_params': sum(p.numel() for p in model.parameters() if p.requires_grad)
+            }
         }
         
         return adapter
