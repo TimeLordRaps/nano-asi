@@ -335,6 +335,10 @@ class LoRAGenerator(nn.Module):
         Returns:
             Dict containing LoRA adapter details
         """
+        # Validate input
+        if isinstance(base_model_name, torch.Tensor):
+            base_model_name = "unsloth/Qwen2.5-Coder-0.5B-Instruct-bnb-4bit"
+        
         # Use default Unsloth Qwen2.5 Coder 0.5B model if not specified
         base_model_name = base_model_name or "unsloth/Qwen2.5-Coder-0.5B-Instruct-bnb-4bit"
 
