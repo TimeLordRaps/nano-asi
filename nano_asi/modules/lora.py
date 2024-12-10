@@ -79,33 +79,28 @@ class LoRAGenerator(nn.Module):
         super().__init__()
         self.config = config or LoRAConfig()
         
-        # Initialize components
-        self._init_network()
-        self._init_diffusion()
-        
-        # Unsloth-inspired reward modeling
-        self.reward_model = self._init_reward_model()
+        # Unsloth-powered model initialization
+        self.model = None
+        self.tokenizer = None
         
         # State tracking
+        self.training_history = []
         self.consciousness_flow = []
-        self.pattern_evolution = defaultdict(list)
-        self.universe_insights = defaultdict(list)
-        self.pattern_evolution_history = []
         
-        # Meta-cognitive state
-        self.meta_cognitive_state = {
-            'strategy_effectiveness': defaultdict(list),
-            'exploration_history': [],
-            'learning_rate_adjustments': [],
-            'pattern_success': defaultdict(lambda: {"successes": 0, "failures": 0}),
-            'reward_history': []
-        }
-
         # Hyperparameters
         self.hyperparameters = {
             'lora_r': self.config.lora_r,
             'lora_alpha': self.config.lora_alpha,
-            'lora_dropout': self.config.lora_dropout
+            'lora_dropout': self.config.lora_dropout,
+            'learning_rate': self.config.learning_rate,
+            'target_modules': self.config.target_modules
+        }
+        
+        # Meta-tracking
+        self.meta_cognitive_state = {
+            'training_iterations': [],
+            'performance_metrics': [],
+            'quantum_resonance_history': []
         }
     
     def _init_reward_model(self):
