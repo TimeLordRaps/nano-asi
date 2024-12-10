@@ -1,90 +1,27 @@
-"""Consciousness tracking and flow analysis for recursive self-improvement."""
+"""Consciousness tracking module."""
 
-from typing import Dict, List, Optional, Any, Union
-from pydantic import BaseModel, Field
-import torch
-import torch.nn.functional as F
-import numpy as np
-from collections import defaultdict
+from typing import Dict, List, Any
 import time
-
-class ConsciousnessState(BaseModel):
-    """State of consciousness flow tracking with quantum-inspired metrics.
-    
-    Attributes:
-        timestamp: Time of state capture
-        activation_patterns: Neural activation patterns with quantum properties
-        thought_chains: Tracked chains of thought with causal dependencies
-        meta_insights: Meta-level insights with recursive improvement potential
-        universe_scores: Scores across parallel universes
-        quantum_metrics: Quantum-inspired consciousness metrics
-        temporal_coherence: Measure of consciousness coherence over time
-        entanglement_patterns: Patterns of thought entanglement
-        resonance_scores: Quantum resonance between thoughts
-    """
-    timestamp: float = Field(default_factory=time.time)
-    activation_patterns: List[Dict[str, Any]] = Field(default_factory=list)
-    thought_chains: List[Dict[str, Any]] = Field(default_factory=list)
-    meta_insights: List[Dict[str, Any]] = Field(default_factory=list)
-    universe_scores: Dict[str, List[float]] = Field(default_factory=lambda: defaultdict(list))
-    quantum_metrics: Dict[str, float] = Field(default_factory=lambda: {
-        "coherence": 0.0,
-        "entanglement": 0.0,
-        "superposition": 0.0,
-        "resonance": 0.0
-    })
-    temporal_coherence: float = Field(default=0.0)
-    entanglement_patterns: List[Dict[str, Any]] = Field(default_factory=list)
-    resonance_scores: Dict[str, float] = Field(default_factory=dict)
+import numpy as np
 
 class ConsciousnessTracker:
-    """Tracks and analyzes consciousness flow patterns.
-    
-    Implements advanced consciousness tracking with:
-    - Neural activation pattern analysis
-    - Thought chain tracking
-    - Meta-cognitive state monitoring
-    - Cross-universe pattern detection
-    """
-    
     def __init__(self):
-        self.states: List[ConsciousnessState] = []
-        self.pattern_evolution = defaultdict(list)
+        self.states = []
         self.meta_cognitive_state = {
-            'strategy_effectiveness': defaultdict(list),
+            'strategy_effectiveness': {},
             'exploration_history': [],
-            'learning_rate_adjustments': [],
-            'pattern_success': defaultdict(lambda: {"successes": 0, "failures": 0})
         }
     
-    async def track_consciousness(self, state_data: Dict[str, Any]) -> ConsciousnessState:
-        """Track consciousness state with pattern analysis.
+    async def track_consciousness(self, state_data: Dict[str, Any]):
+        """Track consciousness state with basic pattern analysis."""
+        state = {
+            'timestamp': time.time(),
+            'activation_patterns': self._analyze_activations(state_data),
+            'thought_chains': self._extract_thought_chains(state_data),
+            'quantum_metrics': self._compute_quantum_metrics(state_data)
+        }
         
-        Args:
-            state_data: Current state data to analyze
-            
-        Returns:
-            ConsciousnessState with analysis results
-        """
-        # Extract activation patterns
-        activation_patterns = await self._analyze_activations(state_data)
-        
-        # Track thought chains
-        thought_chains = await self._extract_thought_chains(state_data)
-        
-        # Generate meta insights
-        meta_insights = await self._analyze_meta_patterns(state_data)
-        
-        # Create new state
-        state = ConsciousnessState(
-            activation_patterns=activation_patterns,
-            thought_chains=thought_chains,
-            meta_insights=meta_insights
-        )
-        
-        # Update history
         self.states.append(state)
-        
         return state
     
     async def _analyze_activations(self, state_data: Dict[str, Any]) -> List[Dict[str, Any]]:

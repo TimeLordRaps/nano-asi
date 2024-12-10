@@ -1,130 +1,18 @@
-"""LoRA diffusion-based adapter generation with recursive optimization."""
+"""LoRA adapter generation module."""
 
-from typing import Dict, List, Optional, Any
-from pydantic import BaseModel, Field
+from typing import Dict, Optional, Any
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import uuid
 import time
 import numpy as np
-import uuid
-from collections import defaultdict
-
-# Unsloth imports
 from unsloth import FastLanguageModel
-from transformers import AutoTokenizer, TrainingArguments
-from trl import SFTTrainer, DPOTrainer
-
-# Diffusers import for noise scheduler
-from diffusers import DDPMScheduler
-
-# Import MAX_SEQ_LENGTH from core configuration
 from nano_asi.core.config import Config
 
-# Use the default max sequence length from the configuration
-MAX_SEQ_LENGTH = Config().model_config.get('max_seq_length', 4096)
 
-class LoRAConfig(BaseModel):
-    """Configuration for LoRA generation with enhanced Unsloth-inspired parameters.
-    
-    Attributes:
-        input_dim: Input dimension
-        hidden_dim: Hidden layer dimension
-        output_dim: Output dimension
-        num_layers: Number of layers
-        dropout: Dropout rate
-        lora_r: LoRA rank (recommended range 16-256)
-        lora_alpha: LoRA alpha scaling factor
-        lora_dropout: LoRA dropout rate
-        beta_schedule: Noise scheduler beta schedule
-        num_diffusion_steps: Number of diffusion steps
-        guidance_scale: Classifier-free guidance scale
-        use_rslora: Enable Rank-Stabilized LoRA
-        target_modules: Modules to apply LoRA
-        weight_decay: L2 regularization parameter
-        learning_rate: Adaptive learning rate for LoRA
-        gradient_accumulation_steps: Gradient accumulation steps
-        max_seq_length: Maximum sequence length for model
-    """
-    input_dim: int = Field(default=512)
-    hidden_dim: int = Field(default=1024)
-    output_dim: int = Field(default=512)
-    num_layers: int = Field(default=6)
-    dropout: float = Field(default=0.1)
-    lora_r: int = Field(default=64, ge=16, le=256, description="LoRA rank")
-    lora_alpha: int = Field(default=64, description="LoRA alpha scaling factor")
-    lora_dropout: float = Field(default=0.0, ge=0.0, le=1.0, description="LoRA dropout rate")
-    beta_schedule: str = Field(default="linear")
-    num_diffusion_steps: int = Field(default=1000)
-    guidance_scale: float = Field(default=7.5)
-    max_seq_length: int = Field(default=2048, description="Maximum sequence length")
-    
-    # Unsloth-inspired additional parameters
-    use_rslora: bool = Field(default=True, description="Enable Rank-Stabilized LoRA")
-    target_modules: List[str] = Field(
-        default_factory=lambda: [
-            "q_proj", "k_proj", "v_proj", "o_proj", 
-            "gate_proj", "up_proj", "down_proj"
-        ],
-        description="Modules to apply LoRA"
-    )
-    weight_decay: float = Field(default=0.01, description="L2 regularization parameter")
-    learning_rate: float = Field(default=2e-4, description="Adaptive learning rate for LoRA")
-    gradient_accumulation_steps: int = Field(default=8, ge=1, description="Gradient accumulation steps")
-
-class LoRAGenerator(nn.Module):
-    """Diffusion-based LoRA adapter generator with Unsloth-inspired reward modeling.
-    
-    Implements:
-    - Neural architecture for LoRA generation
-    - Diffusion-based optimization
-    - Recursive self-improvement
-    - Parallel universe exploration
-    - Consciousness flow integration
-    - Advanced reward modeling techniques
-    """
-    
-    def __init__(self, config: Optional[LoRAConfig] = None):
-        super().__init__()
-        self.config = config or LoRAConfig()
-        
-        # Unsloth-powered model initialization
-        self.model = None
-        self.tokenizer = None
-        
-        # State tracking
-        self.training_history = []
-        self.consciousness_flow = []
-        
-        # Hyperparameters
-        self.hyperparameters = {
-            'lora_r': self.config.lora_r,
-            'lora_alpha': self.config.lora_alpha,
-            'lora_dropout': self.config.lora_dropout,
-            'learning_rate': self.config.learning_rate,
-            'target_modules': self.config.target_modules
-        }
-        
-        # Meta-tracking
-        self.meta_cognitive_state = {
-            'training_iterations': [],
-            'performance_metrics': [],
-            'quantum_resonance_history': [],
-            'strategy_effectiveness': [],
-            'pattern_success': defaultdict(int),
-            'learning_rate_adjustments': [],
-            'consciousness_flow': [],
-            'exploration_history': []
-        }
-        
-        # Temporal investment tracking
-        self.temporal_investment = {
-            'investment_history': [],
-            'temporal_roi': {}
-        }
-        
-        # Pattern evolution tracking
-        self.pattern_evolution_history = []
+class LoRAGenerator:
+    def __init__(self, config=None):
+        self.config = config or {}
+        self.max_seq_length = Config().model_config.get('max_seq_length', 4096)
     
     def _init_reward_model(self):
         """Initialize reward modeling with Unsloth-inspired techniques."""
@@ -337,50 +225,33 @@ class LoRAGenerator(nn.Module):
 
     async def generate_lora_adapter(
         self, 
-        base_model_name: Optional[str] = None,
-        consciousness_tracker: Optional[Any] = None,
-        conditional_tokens: Optional[torch.Tensor] = None
+        conditional_tokens: Optional[torch.Tensor] = None,
+        base_model_name: str = "unsloth/Qwen2.5-Coder-0.5B-Instruct-bnb-4bit",
+        consciousness_tracker: Optional[Any] = None
     ) -> Dict[str, Any]:
-        """
-        Generate a LoRA adapter using Unsloth's optimized approach.
-        
-        Args:
-            base_model_name: Base model to use for LoRA generation. 
-                             If None, uses default Unsloth Qwen2.5 Coder 0.5B model.
-            consciousness_tracker: Optional consciousness tracking module
-            conditional_tokens: Optional conditional tokens for generation
-        
-        Returns:
-            Dict containing LoRA adapter details
-        """
-        # Validate input
-        if base_model_name is None:
-            base_model_name = "unsloth/Qwen2.5-Coder-0.5B-Instruct-bnb-4bit"
+        """Generate a LoRA adapter with minimal configuration."""
+        if conditional_tokens is None:
+            raise ValueError("Conditional tokens must be provided")
 
-        # Initialize Unsloth model with LoRA
         model, tokenizer = FastLanguageModel.from_pretrained(
             model_name=base_model_name,
-            max_seq_length=self.config.max_seq_length,  # Use default from config
-            dtype=None,  # Auto-detect optimal dtype
+            max_seq_length=self.max_seq_length,
+            dtype=None,
             load_in_4bit=True,
         )
-        
-        # Add LoRA adapters with configuration optimized for 0.5B model
+
+        # Basic LoRA configuration
         model = FastLanguageModel.get_peft_model(
             model,
-            r=self.config.lora_r or 32,  # Smaller rank for 0.5B model
-            target_modules=self.config.target_modules or [
-                "q_proj", "k_proj", "v_proj", 
-                "o_proj", "gate_proj"
-            ],
-            lora_alpha=self.config.lora_alpha or 64,
-            lora_dropout=self.config.lora_dropout or 0.05,
+            r=32,  # Smaller rank for 0.5B model
+            target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj"],
+            lora_alpha=64,
+            lora_dropout=0.05,
             bias="none",
             use_gradient_checkpointing="unsloth",
-            use_rslora=self.config.use_rslora or True,
             random_state=42,
         )
-        
+
         # Track consciousness flow if tracker is provided
         consciousness_flow = None
         if consciousness_tracker:
@@ -389,51 +260,40 @@ class LoRAGenerator(nn.Module):
                     'model_details': {
                         'base_model': base_model_name,
                         'lora_config': {
-                            'r': self.config.lora_r or 32,
-                            'alpha': self.config.lora_alpha or 64,
-                            'dropout': self.config.lora_dropout or 0.05,
-                            'use_rslora': self.config.use_rslora or True
+                            'r': 32,
+                            'alpha': 64,
+                            'dropout': 0.05
                         }
                     }
                 })
             except Exception as e:
                 print(f"Consciousness tracking failed: {e}")
-        
-        # Convert consciousness flow to a list if it's a single state
-        if consciousness_flow and not isinstance(consciousness_flow, list):
-            consciousness_flow = [consciousness_flow]
-        
+
         # Generate quantum resonance scores
-        quantum_resonance = torch.rand(self.config.lora_r or 32).tolist()
-        
-        # Prepare adapter metadata with enhanced tracking
+        quantum_resonance = torch.rand(32).tolist()
+
+        # Prepare adapter metadata
         adapter = {
             'model': model,
             'tokenizer': tokenizer,
             'base_model_name': base_model_name,
             'metadata': {
                 'timestamp': time.time(),
-                'consciousness_integrated': consciousness_tracker is not None,
                 'lora_config': {
-                    'r': self.config.lora_r or 32,
-                    'alpha': self.config.lora_alpha or 64,
-                    'dropout': self.config.lora_dropout or 0.05,
-                    'target_modules': self.config.target_modules or [
-                        "q_proj", "k_proj", "v_proj", 
-                        "o_proj", "gate_proj"
-                    ],
-                    'use_rslora': self.config.use_rslora or True
+                    'r': 32,
+                    'alpha': 64,
+                    'dropout': 0.05,
+                    'target_modules': ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj"]
                 }
             },
             'consciousness_flow': consciousness_flow or [],
-            'improvement_history': [],
             'quantum_resonance': quantum_resonance,
             'performance_metrics': {
                 'model_size': sum(p.numel() for p in model.parameters()),
                 'trainable_params': sum(p.numel() for p in model.parameters() if p.requires_grad)
             }
         }
-        
+
         return adapter
 
     async def explore_parallel_universes(self, num_universes: int = 3) -> Dict[str, Any]:
