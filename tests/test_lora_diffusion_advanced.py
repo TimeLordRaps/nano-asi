@@ -41,8 +41,14 @@ class TestAdvancedLoRADiffusionFramework:
         )
 
     @pytest.fixture
-    def lora_generator(self, lora_config):
+    def device(self):
+        """Get the appropriate device (CUDA if available, else CPU)."""
+        return torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    @pytest.fixture 
+    def lora_generator(self, lora_config, device):
         """Create a LoRA generator with advanced configuration."""
+        lora_config.device = device
         return LoRAGenerator(lora_config)
 
     @pytest.mark.asyncio
