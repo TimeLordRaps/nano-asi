@@ -142,9 +142,10 @@ class TestAdvancedLoRADiffusionFramework:
                 next_round_adapters.append(winner)
                 
                 # Add loser to database with comprehensive scoring
+                loser_key = 'adapter1' if loser == adapter1 else 'adapter2'
                 tournament_state['lora_database'].append({
                     **loser,
-                    'score': comparison['scores'][loser['tokens'].tobytes()],
+                    'score': comparison['scores'][loser_key],
                     'tournament_round': round
                 })
             
@@ -222,10 +223,10 @@ class TestAdvancedLoRADiffusionFramework:
              diversity_bonus2 * 0.3) * complexity_bonus
         )
         
-        # Determine winner and loser using tensor IDs
+        # Store scores by adapter reference
         scores = {
-            id(adapter1['tokens']): score1,
-            id(adapter2['tokens']): score2
+            'adapter1': score1,
+            'adapter2': score2
         }
         
         return {

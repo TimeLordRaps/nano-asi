@@ -96,8 +96,11 @@ class TestLoRADiffusionFramework:
                     )
                     round_winners.append(comparison_result['winner'])
             
-            # Update winners list with unique winners using tensor ID comparison
-            winners.extend([w for w in round_winners if not any(torch.equal(w['tokens'], existing['tokens']) for existing in winners)])
+            # Update winners list with unique winners and scores
+            for winner in round_winners:
+                if not any(torch.equal(winner['tokens'], existing['tokens']) for existing in winners):
+                    winner['score'] = comparison['scores']['adapter1' if winner == adapter1 else 'adapter2']
+                    winners.append(winner)
         
         return {
             'winners': winners,
