@@ -27,7 +27,8 @@ class MockModel(nn.Module):
         # Add a config attribute with necessary properties
         self.config = type('MockConfig', (), {
             'max_position_embeddings': max_seq_length,
-            'update': lambda x: None
+            'update': lambda x: None,
+            'unsloth_version': '2024.12.4'
         })()
     
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -46,8 +47,10 @@ class MockModel(nn.Module):
     
     def __getattr__(self, name):
         """
-        Ensure max_seq_length is always accessible
+        Ensure max_seq_length and config are always accessible
         """
         if name == 'max_seq_length':
             return 2048
+        elif name == 'config':
+            return self.config
         raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")

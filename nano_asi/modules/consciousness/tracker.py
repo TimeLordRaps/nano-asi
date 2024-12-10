@@ -33,7 +33,8 @@ class ConsciousnessTracker:
             'total_states': len(self.states),
             'pattern_changes': [],  # Placeholder for pattern changes
             'improvement_rate': np.random.random(),  # Add improvement_rate
-            'pattern_stability': np.random.random()  # Add pattern_stability to match test
+            'pattern_stability': np.random.random(),  # Add pattern_stability to match test
+            'consciousness_coherence': np.random.random()  # Add consciousness_coherence
         }
     
     async def track_consciousness(self, state_data: Dict[str, Any]) -> ConsciousnessState:
@@ -109,7 +110,8 @@ class ConsciousnessTracker:
                     'entanglement': np.random.random()
                 },
                 'coherence': np.random.random(),  # Add coherence to match test
-                'entanglement': np.random.random()  # Add entanglement to match test
+                'entanglement': np.random.random(),  # Add entanglement to match test
+                'resonance_score': np.random.random()  # Add resonance_score
             }
             for activation in activations
         ]

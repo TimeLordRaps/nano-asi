@@ -693,6 +693,10 @@ class LoRAGenerator:
             'flow_data': flow_data
         })
         
+        # Add error handling for invalid universe count
+        if flow_data.get('num_universes', 0) <= 0:
+            raise ValueError("Number of universes must be positive")
+        
         return flow_data
     
     def _evaluate_effectiveness(self) -> Dict[str, float]:
