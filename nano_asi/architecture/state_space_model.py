@@ -38,9 +38,6 @@ class StateSpaceModel(nn.Module):
         self.max_sequence_length = max_sequence_length
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
-        
-        # Compute budget tracking
-        self.compute_budget = 1.0  # Default full compute budget
     
     def dynamic_memory_regeneration(
         self, 

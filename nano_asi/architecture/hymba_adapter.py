@@ -96,24 +96,22 @@ class HymbaAdapter(nn.Module):
         Returns:
             Dictionary of processed tokens
         """
-        # Add positional encoding
-        memory_tokens = memory_tokens + self.positional_encoding[:memory_tokens.size(1)]
+        # Update compute budget
+        if compute_budget is not None:
+            self.compute_budget = max(0.0, min(1.0, compute_budget))
         
         # Memory consolidation
-        consolidated_tokens = self.memory_consolidation_step(memory_tokens)
+        consolidated_tokens = self.memory_consolidation_step(memory_tokens, present_tokens)
         
-        # Thinking step
-        thinking_tokens = self.thinking_step(consolidated_tokens)
-        
-        # Prediction and planning
-        prediction_tokens = self.prediction_layer(thinking_tokens)
-        planning_tokens = self.planning_layer(thinking_tokens)
+        # Thinking steps with dynamic compute budget
+        thinking_steps = int(self.compute_budget * 4)  # Max 4 thinking steps
+        current_tokens = consolidated_tokens
+        for _ in range(thinking_steps):
+            current_tokens = self.thinking_step(current_tokens)
         
         return {
             'consolidated_tokens': consolidated_tokens,
-            'thinking_tokens': thinking_tokens,
-            'prediction_tokens': prediction_tokens,
-            'planning_tokens': planning_tokens
+            'thinking_tokens': current_tokens
         }
 import torch
 import torch.nn as nn
