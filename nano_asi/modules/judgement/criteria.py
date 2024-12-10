@@ -8,7 +8,7 @@ class PerformanceCriteria(JudgementCriteria):
 class ComplexityCriteria(JudgementCriteria):
     def evaluate(self, candidate: Any) -> float:
         complexity = candidate.get('complexity', 0.7)  # Default to 0.7 to match test
-        return 1.0 - complexity  # Lower complexity is better
+        return complexity  # Directly return complexity
 
 class InnovationCriteria(JudgementCriteria):
     def evaluate(self, candidate: Any) -> float:

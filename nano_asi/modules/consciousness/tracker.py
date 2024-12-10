@@ -46,8 +46,7 @@ class ConsciousnessTracker:
             quantum_metrics=quantum_metrics,
             activation_patterns=activation_patterns,
             thought_chains=thought_chains,
-            temporal_coherence=await self._compute_temporal_coherence(state_data),
-            timestamp=time.time()
+            temporal_coherence=await self._compute_temporal_coherence(state_data)
         )
         
         # Store and return state
@@ -82,14 +81,16 @@ class ConsciousnessTracker:
             List of activation pattern analyses
         """
         await asyncio.sleep(0.01)  # Simulate async computation
+        activations = state_data.get('activations', [])
         return [
             {
-                'layer_type': 'dense',
+                'layer_type': activation.get('layer_type', 'dense'),
                 'activation_stats': {
-                    'mean': np.random.random(),
-                    'std': np.random.random()
+                    'mean': np.mean(activation.get('gradients', [0])),
+                    'std': np.std(activation.get('gradients', [0]))
                 }
             }
+            for activation in activations
         ]
     
     async def _extract_thought_chains(self, state_data: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -103,11 +104,13 @@ class ConsciousnessTracker:
             List of thought chain analyses
         """
         await asyncio.sleep(0.01)  # Simulate async computation
+        thoughts = state_data.get('thoughts', [])
         return [
             {
-                'content': 'Sample thought',
-                'complexity': np.random.random()
+                'content': thought.get('content', 'Sample thought'),
+                'complexity': thought.get('cognitive_trajectory', {}).get('exploration_depth', np.random.random())
             }
+            for thought in thoughts
         ]
     
     async def _compute_temporal_coherence(self, state_data: Dict[str, Any]) -> float:
