@@ -104,12 +104,17 @@ NanoASI is an advanced framework for building recursive self-improving AI system
 - [Design Philosophy](Research/Philosophy.md)
 - [Quantum-Inspired Computing](Research/Quantum_Concepts.md)
 
-## Community
+## Community and Support
 
 - [GitHub Repository](https://github.com/TimeLordRaps/nano-asi)
 - [Discussion Forums](https://github.com/TimeLordRaps/nano-asi/discussions)
 - [Issue Tracker](https://github.com/TimeLordRaps/nano-asi/issues)
+- [Discord Community](https://discord.gg/nano-asi)
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](Development/Contributing.md) to get started.
 
 ## License
 
-NanoASI is released under the GPL-3.0 License.
+NanoASI is released under the GPL-3.0 License. See the [LICENSE](../LICENSE) file for details.
