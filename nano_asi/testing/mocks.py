@@ -37,3 +37,11 @@ class MockModel(nn.Module):
         Mock method to simulate model's embedding layer retrieval
         """
         return self.embed_tokens
+    
+    def __getattr__(self, name):
+        """
+        Ensure max_seq_length is always accessible
+        """
+        if name == 'max_seq_length':
+            return 2048
+        raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")

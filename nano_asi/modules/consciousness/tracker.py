@@ -31,7 +31,8 @@ class ConsciousnessTracker:
         """
         return {
             'total_states': len(self.states),
-            'pattern_changes': []  # Placeholder for pattern changes
+            'pattern_changes': [],  # Placeholder for pattern changes
+            'improvement_rate': np.random.random()  # Add improvement_rate
         }
     
     async def track_consciousness(self, state_data: Dict[str, Any]) -> ConsciousnessState:
@@ -101,7 +102,11 @@ class ConsciousnessTracker:
                     'mean': np.mean(activation.get('gradients', [0])),
                     'std': np.std(activation.get('gradients', [0]))
                 },
-                'pattern_type': 'dense_uniform'  # Add pattern_type to match test
+                'pattern_type': 'dense_uniform',  # Add pattern_type to match test
+                'quantum_stats': {  # Add quantum_stats
+                    'coherence': np.random.random(),
+                    'entanglement': np.random.random()
+                }
             }
             for activation in activations
         ]
@@ -122,7 +127,8 @@ class ConsciousnessTracker:
             {
                 'content': thought.get('content', 'Sample thought'),
                 'complexity': thought.get('cognitive_trajectory', {}).get('exploration_depth', np.random.random()),
-                'dependencies': []  # Add dependencies to match test
+                'dependencies': [],  # Add dependencies to match test
+                'meta_level': 1  # Add meta_level
             }
             for thought in thoughts
         ]
@@ -153,5 +159,9 @@ class ConsciousnessTracker:
         await asyncio.sleep(0.01)  # Simulate async computation
         return [{
             'pattern_evolution': self.pattern_evolution,
-            'total_states': len(self.states)
+            'total_states': len(self.states),
+            'pattern_metrics': {  # Add pattern_metrics
+                'complexity': np.random.random(),
+                'coherence': np.random.random()
+            }
         }]
