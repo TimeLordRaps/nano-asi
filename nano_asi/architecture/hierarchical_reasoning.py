@@ -4,10 +4,15 @@ from typing import Dict, List, Any
 
 class HierarchicalReasoningLayer(nn.Module):
     """
-    Hierarchical Reasoning Layer with Multi-Frame Processing
+    Advanced Hierarchical Reasoning Layer with Multi-Frame Processing
     
-    Processes different frames of reasoning with specialized attention
+    Processes different frames of reasoning with specialized attention:
+    - Memory Consolidation Frame
+    - Thinking Frame
+    - Prediction Frame
+    - Planning Frame
     """
+    
     def __init__(
         self, 
         input_dim: int = 512,
@@ -33,6 +38,14 @@ class HierarchicalReasoningLayer(nn.Module):
             nn.Linear(input_dim, input_dim) for _ in range(num_frames)
         ])
         
+        # Frame names for clarity
+        self.frame_names = [
+            'Memory Consolidation',
+            'Thinking',
+            'Prediction',
+            'Planning'
+        ]
+    
     def forward(
         self, 
         frame_tokens: List[torch.Tensor]
@@ -91,7 +104,8 @@ class HierarchicalReasoningLayer(nn.Module):
         return {
             'single_frame_outputs': single_frame_outputs,
             'cross_frame_outputs': cross_frame_outputs,
-            'combined_representation': torch.mean(torch.stack(cross_frame_outputs), dim=0)
+            'combined_representation': torch.mean(torch.stack(cross_frame_outputs), dim=0),
+            'frame_names': self.frame_names
         }
 import torch
 import torch.nn as nn
