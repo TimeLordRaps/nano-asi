@@ -60,7 +60,7 @@ class LoRAGenerator:
             raise ValueError("Conditional tokens must be provided and non-empty")
 
         # Use provided or default base model
-        model_name = base_model_name or self.base_model_name
+        model_name = base_model_name or "unsloth/Qwen2.5-Coder-0.5B-Instruct-bnb-4bit"
 
         # Load model with LoRA configuration
         model, tokenizer = FastLanguageModel.from_pretrained(
