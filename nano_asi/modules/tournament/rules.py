@@ -29,6 +29,33 @@ class SingleEliminationTournament(Generic[T]):
         normalized_score = (score1 / (score1 + score2)) + random.uniform(-0.1, 0.1)
         
         return max(0, min(1, normalized_score))
+    
+    def run_tournament(self, participants):
+        """
+        Run a single elimination tournament.
+        
+        Args:
+            participants: List of tournament participants
+        
+        Returns:
+            List of tournament results
+        """
+        results = []
+        while len(participants) > 1:
+            next_round = []
+            for i in range(0, len(participants), 2):
+                if i + 1 < len(participants):
+                    match_result = self.match(participants[i], participants[i+1])
+                    winner = participants[i] if match_result >= 0.5 else participants[i+1]
+                    next_round.append(winner)
+                    results.append({
+                        'participants': [participants[i], participants[i+1]],
+                        'winner': winner,
+                        'score': match_result
+                    })
+            participants = next_round
+        
+        return results
 
 class RoundRobinTournament(SingleEliminationTournament[T]):
     def __init__(

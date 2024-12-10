@@ -60,8 +60,21 @@ class LoRAGenerator:
             Dict containing LoRA adapter details and metadata.
         """
         # Validate input
-        if conditional_tokens is None or len(conditional_tokens) == 0:
-            raise ValueError("Conditional tokens must be provided and non-empty")
+        if conditional_tokens is None:
+            raise ValueError("Conditional tokens must be provided")
+        
+        if len(conditional_tokens) == 0:
+            raise ValueError("Conditional tokens cannot be empty")
+        
+        # Add max_seq_length to MockModel for testing
+        class MockModel(torch.nn.Module):
+            def __init__(self):
+                super().__init__()
+                self.embed_tokens = torch.nn.Embedding(1000, 512)
+                self.layers = torch.nn.ModuleList([
+                    torch.nn.Linear(512, 512) for _ in range(4)
+                ])
+                self.max_seq_length = 2048  # Add max_seq_length attribute
 
         # Load model with LoRA configuration
         try:
