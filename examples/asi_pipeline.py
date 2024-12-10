@@ -70,15 +70,32 @@ class OpenWebUIPipeline:
     async def initialize_model(
         self,
         base_model_name: str = "unsloth/Qwen2.5-Coder-1.5B-Instruct-bnb-4bit",
-        device_map: str = "auto"
+        device_map: str = "auto",
+        max_seq_length: int = 4096,
     ):
         """Initialize base model and tokenizer with Unsloth optimization."""
         self.base_model, self.tokenizer = FastLanguageModel.from_pretrained(
             model_name=base_model_name,
-            max_seq_length=4096,
-            dtype=torch.float16,
+            max_seq_length=max_seq_length,
+            dtype=None,  # Auto-detect optimal dtype
             load_in_4bit=True,
-            device_map=device_map
+            device_map=device_map,
+        )
+        
+        # Add LoRA adapters for efficient training
+        self.base_model = FastLanguageModel.get_peft_model(
+            self.base_model,
+            r=16,  # LoRA rank
+            target_modules=[
+                "q_proj", "k_proj", "v_proj", "o_proj",
+                "gate_proj", "up_proj", "down_proj",
+            ],
+            lora_alpha=16,
+            lora_dropout=0,  # Optimized setting
+            bias="none",     # Optimized setting
+            use_gradient_checkpointing="unsloth",  # Enable memory savings
+            random_state=42,
+            max_seq_length=max_seq_length,
         )
         
         self.current_model = self.base_model
@@ -164,25 +181,86 @@ class OpenWebUIPipeline:
     
     async def _supervised_fine_tuning(self, dataset: Optional[Any]):
         """Implement SFT stage with judgment-guided training."""
+        from transformers import TrainingArguments
+        from unsloth import is_bfloat16_supported
+        
+        training_args = TrainingArguments(
+            output_dir="outputs/sft",
+            per_device_train_batch_size=2,
+            gradient_accumulation_steps=4,
+            warmup_steps=5,
+            max_steps=100,
+            learning_rate=2e-4,
+            fp16=not is_bfloat16_supported(),
+            bf16=is_bfloat16_supported(),
+            logging_steps=1,
+            optim="adamw_8bit",
+            seed=42,
+        )
+
         sft_trainer = SFTTrainer(
             model=self.current_model,
             train_dataset=dataset,
-            judgment_system=self.judgment_system
+            dataset_text_field="text",
+            max_seq_length=self.current_model.config.max_position_embeddings,
+            tokenizer=self.tokenizer,
+            args=training_args,
         )
+        
         sft_trainer.train()
     
     async def _orpo_training(self, dataset: Optional[Any]):
         """Implement ORPO training stage with meta-judgment."""
+        from transformers import TrainingArguments
+        from unsloth import is_bfloat16_supported, PatchDPOTrainer
+        
+        # Enable Unsloth's DPO optimizations
+        PatchDPOTrainer()
+        
+        training_args = TrainingArguments(
+            output_dir="outputs/orpo",
+            per_device_train_batch_size=2,
+            gradient_accumulation_steps=4, 
+            warmup_steps=5,
+            max_steps=100,
+            learning_rate=2e-4,
+            fp16=not is_bfloat16_supported(),
+            bf16=is_bfloat16_supported(),
+            logging_steps=1,
+            optim="adamw_8bit",
+            seed=42,
+        )
+
         dpo_trainer = DPOTrainer(
             model=self.current_model,
+            ref_model=None,  # Use implicit reference
+            args=training_args,
+            beta=0.1,
             train_dataset=dataset,
-            judgment_system=self.judgment_system
+            tokenizer=self.tokenizer,
+            max_length=self.current_model.config.max_position_embeddings,
+            max_prompt_length=512,
         )
+        
         dpo_trainer.train()
     
     async def _merge_adapter(self):
         """Merge trained adapter weights back to base model."""
-        self.current_model = PeftModel.merge_and_unload(self.current_model)
+        # Save merged model in 16-bit for better compatibility
+        save_dir = "outputs/merged_model"
+        self.current_model.save_pretrained_merged(
+            save_dir,
+            self.tokenizer,
+            save_method="merged_16bit",
+            max_shard_size="2GB",
+        )
+        
+        # Reload merged model
+        self.current_model, self.tokenizer = FastLanguageModel.from_pretrained(
+            save_dir,
+            max_seq_length=self.current_model.config.max_position_embeddings,
+            load_in_4bit=True,
+        )
     
     def _select_reasoning_modules(self) -> List[Dict[str, Any]]:
         """Select appropriate reasoning modules for tournament."""
