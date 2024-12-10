@@ -25,6 +25,18 @@ class ComplexityCriteria(JudgementCriteria):
         elif complexity1 < complexity2:
             return -1
         return 0
+    
+    def aggregate_score(self, candidate: Any) -> float:
+        """
+        Compute an aggregate score based on complexity.
+        
+        Args:
+            candidate: Candidate to evaluate
+        
+        Returns:
+            Aggregate complexity score
+        """
+        return self.evaluate(candidate)
 
 class InnovationCriteria(JudgementCriteria):
     def evaluate(self, candidate: Any) -> float:

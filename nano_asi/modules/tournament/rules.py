@@ -84,6 +84,28 @@ class RoundRobinTournament(SingleEliminationTournament[T]):
         ) * 0.1
         
         return max(0, min(1, base_score + history_factor))
+    
+    def run_tournament(self, participants):
+        """
+        Run a round-robin tournament with all participants.
+        
+        Args:
+            participants: List of tournament participants
+        
+        Returns:
+            List of tournament results
+        """
+        results = []
+        for i in range(len(participants)):
+            for j in range(i+1, len(participants)):
+                match_result = self.match(participants[i], participants[j])
+                results.append({
+                    'participants': [participants[i], participants[j]],
+                    'winner': participants[i] if match_result >= 0.5 else participants[j],
+                    'score': match_result
+                })
+        
+        return results
 
 class ProbabilisticTournamentRules(SingleEliminationTournament[T]):
     def __init__(
