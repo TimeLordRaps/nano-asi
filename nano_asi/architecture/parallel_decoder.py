@@ -859,7 +859,8 @@ class ParallelDecoder(nn.Module):
         self, 
         base_model_name: str = 'unsloth/Qwen2.5-Coder-0.5B-Instruct-bnb-4bit',
         chunk_size: int = 128000,
-        memory_token_dim: int = 512
+        memory_token_dim: int = 512,
+        max_seq_length: int = 131072  # 128k tokens
     ):
         super().__init__()
         
