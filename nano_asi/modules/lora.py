@@ -44,6 +44,7 @@ class LoRAConfig(BaseModel):
         weight_decay: L2 regularization parameter
         learning_rate: Adaptive learning rate for LoRA
         gradient_accumulation_steps: Gradient accumulation steps
+        max_seq_length: Maximum sequence length for model
     """
     input_dim: int = Field(default=512)
     hidden_dim: int = Field(default=1024)
@@ -56,6 +57,7 @@ class LoRAConfig(BaseModel):
     beta_schedule: str = Field(default="linear")
     num_diffusion_steps: int = Field(default=1000)
     guidance_scale: float = Field(default=7.5)
+    max_seq_length: int = Field(default=2048, description="Maximum sequence length")
     
     # Unsloth-inspired additional parameters
     use_rslora: bool = Field(default=True, description="Enable Rank-Stabilized LoRA")
@@ -111,7 +113,8 @@ class LoRAGenerator(nn.Module):
             'strategy_effectiveness': [],
             'pattern_success': defaultdict(int),
             'learning_rate_adjustments': [],
-            'consciousness_flow': []
+            'consciousness_flow': [],
+            'exploration_history': []
         }
         
         # Temporal investment tracking
@@ -119,6 +122,9 @@ class LoRAGenerator(nn.Module):
             'investment_history': [],
             'temporal_roi': {}
         }
+        
+        # Pattern evolution tracking
+        self.pattern_evolution_history = []
     
     def _init_reward_model(self):
         """Initialize reward modeling with Unsloth-inspired techniques."""
@@ -332,7 +338,8 @@ class LoRAGenerator(nn.Module):
     async def generate_lora_adapter(
         self, 
         base_model_name: Optional[str] = None,
-        consciousness_tracker: Optional[Any] = None
+        consciousness_tracker: Optional[Any] = None,
+        conditional_tokens: Optional[torch.Tensor] = None
     ) -> Dict[str, Any]:
         """
         Generate a LoRA adapter using Unsloth's optimized approach.
@@ -341,21 +348,19 @@ class LoRAGenerator(nn.Module):
             base_model_name: Base model to use for LoRA generation. 
                              If None, uses default Unsloth Qwen2.5 Coder 0.5B model.
             consciousness_tracker: Optional consciousness tracking module
+            conditional_tokens: Optional conditional tokens for generation
         
         Returns:
             Dict containing LoRA adapter details
         """
         # Validate input
-        if isinstance(base_model_name, torch.Tensor):
+        if base_model_name is None:
             base_model_name = "unsloth/Qwen2.5-Coder-0.5B-Instruct-bnb-4bit"
-        
-        # Use default Unsloth Qwen2.5 Coder 0.5B model if not specified
-        base_model_name = base_model_name or "unsloth/Qwen2.5-Coder-0.5B-Instruct-bnb-4bit"
 
         # Initialize Unsloth model with LoRA
         model, tokenizer = FastLanguageModel.from_pretrained(
             model_name=base_model_name,
-            max_seq_length=self.config.max_seq_length or 2048,  # Adjusted for 0.5B model
+            max_seq_length=self.config.max_seq_length,  # Use default from config
             dtype=None,  # Auto-detect optimal dtype
             load_in_4bit=True,
         )
