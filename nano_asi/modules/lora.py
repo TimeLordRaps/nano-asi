@@ -1,12 +1,15 @@
 """LoRA adapter generation module."""
 
-from typing import Dict, Optional, Any
+from typing import Dict, Optional, Any, List
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
 import uuid
 import time
 import numpy as np
 from unsloth import FastLanguageModel
 from nano_asi.core.config import Config
+from diffusers import DDPMScheduler
 
 
 class LoRAGenerator:
