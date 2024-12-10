@@ -850,9 +850,13 @@ from unsloth import FastLanguageModel
 
 class ParallelDecoder(nn.Module):
     """
-    Parallel Decoder for State-Space Model Integration
+    Advanced Parallel Decoder for State-Space Model Integration
     
-    Handles chunking, memory token generation, and coherence tracking
+    Handles:
+    - Large context chunking (up to 128K tokens)
+    - Memory and coherence token generation
+    - Rope embeddings
+    - Integration with Hymba and Reflection Adapters
     """
     
     def __init__(
