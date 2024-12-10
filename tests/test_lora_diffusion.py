@@ -96,8 +96,8 @@ class TestLoRADiffusionFramework:
                     )
                     round_winners.append(comparison_result['winner'])
             
-            # Update winners list
-            winners.extend(round_winners)
+            # Update winners list with unique winners
+            winners.extend([w for w in round_winners if w not in winners])
         
         return {
             'winners': winners,
@@ -115,9 +115,9 @@ class TestLoRADiffusionFramework:
         - Adaptation potential
         - Diversity metrics
         """
-        # Compute quantum resonance scores
-        resonance1 = np.mean(adapter1.get('quantum_resonance', [0]))
-        resonance2 = np.mean(adapter2.get('quantum_resonance', [0]))
+        # Compute quantum resonance scores using PyTorch
+        resonance1 = torch.mean(torch.tensor(adapter1.get('quantum_resonance', [0.0])))
+        resonance2 = torch.mean(torch.tensor(adapter2.get('quantum_resonance', [0.0])))
         
         # Evaluate consciousness flow coherence
         coherence1 = self._compute_flow_coherence(adapter1)

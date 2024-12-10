@@ -295,9 +295,10 @@ class TestAdvancedLoRADiffusionFramework:
         - Consciousness flow divergence
         """
         # Token distribution difference
-        token_diff = np.abs(
-            np.mean(adapter1['tokens']) - np.mean(adapter2['tokens'])
-        )
+        # Convert PyTorch tensors to mean values properly
+        token_diff = torch.abs(
+            adapter1['tokens'].mean() - adapter2['tokens'].mean()
+        ).item()
         
         # Quantum resonance variance
         resonance_diff = np.abs(
@@ -335,12 +336,17 @@ class TestAdvancedLoRADiffusionFramework:
             for state in flow2
         ]
         
-        # Compute Jensen-Shannon divergence
-        m = 0.5 * (np.array(metrics1) + np.array(metrics2))
+        # Compute Jensen-Shannon divergence using PyTorch
+        metrics1_tensor = torch.tensor(metrics1)
+        metrics2_tensor = torch.tensor(metrics2)
+        m = 0.5 * (metrics1_tensor + metrics2_tensor)
+        
+        # Handle potential numerical instabilities
+        eps = 1e-8
         divergence = 0.5 * (
-            np.sum(metrics1 * np.log(metrics1 / m)) +
-            np.sum(metrics2 * np.log(metrics2 / m))
-        )
+            torch.sum(metrics1_tensor * torch.log(metrics1_tensor / (m + eps) + eps)) +
+            torch.sum(metrics2_tensor * torch.log(metrics2_tensor / (m + eps) + eps))
+        ).item()
         
         return float(divergence)
 
