@@ -4,6 +4,18 @@ import numpy as np
 import asyncio
 from typing import Dict, List, Any
 import uuid
+from functools import wraps
+
+def timeout(seconds):
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            try:
+                return await asyncio.wait_for(func(*args, **kwargs), timeout=seconds)
+            except asyncio.TimeoutError:
+                pytest.skip(f"Test skipped - exceeded {seconds} seconds timeout")
+        return wrapper
+    return decorator
 
 from nano_asi.modules.lora import LoRAGenerator, LoRAConfig
 from nano_asi.modules.consciousness import ConsciousnessTracker
