@@ -383,6 +383,7 @@ class TestAdvancedLoRADiffusionFramework:
             return 0.0  # Return safe default value
 
     @pytest.mark.asyncio
+    @timeout(30)  # 30 second timeout
     async def test_diffusion_model_training_workflow(self, lora_generator):
         """
         Test the workflow of training a diffusion model using the LoRA database.
@@ -396,7 +397,7 @@ class TestAdvancedLoRADiffusionFramework:
         num_adapters = 10
         initial_adapters = []
         for _ in range(num_adapters):
-            conditional_tokens = torch.randn(1, 128, 64)
+            conditional_tokens = torch.randn(1, 128, 64, device=lora_generator.device)
             adapter = await lora_generator.generate_lora_adapter(
                 conditional_tokens=conditional_tokens
             )

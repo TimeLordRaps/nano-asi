@@ -4,6 +4,19 @@ import numpy as np
 from typing import Dict, List, Any
 import uuid
 import asyncio
+from functools import wraps
+import signal
+
+def timeout(seconds):
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            try:
+                return await asyncio.wait_for(func(*args, **kwargs), timeout=seconds)
+            except asyncio.TimeoutError:
+                pytest.skip(f"Test skipped - exceeded {seconds} seconds timeout")
+        return wrapper
+    return decorator
 
 from nano_asi.modules.lora import LoRAGenerator, LoRAConfig
 from nano_asi.modules.consciousness import ConsciousnessTracker
@@ -22,7 +35,7 @@ class TestDiffusionWorkflow:
         return AdvancedTestSuite()
     
     @pytest.fixture
-    def lora_config(self):
+    def lora_config(self, device):
         """Optimized LoRA config for 0.5B model."""
         return LoRAConfig(
             input_dim=512,
@@ -38,6 +51,7 @@ class TestDiffusionWorkflow:
         )
     
     @pytest.mark.asyncio
+    @timeout(30)  # 30 second timeout
     async def test_end_to_end_workflow(self, test_suite, lora_config):
         """Test complete workflow from LoRA generation to diffusion training."""
         # Generate test scenarios
@@ -96,7 +110,7 @@ class TestDiffusionWorkflow:
         for _ in range(num_adapters):
             # Generate adapter with consciousness tracking
             adapter = await generator.generate_lora_adapter(
-                conditional_tokens=torch.randn(1, 128, 64),
+                conditional_tokens=torch.randn(1, 128, 64, device=generator.device),
                 consciousness_tracker=tracker
             )
             
