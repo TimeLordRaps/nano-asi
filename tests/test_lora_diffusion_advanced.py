@@ -156,9 +156,17 @@ class TestAdvancedLoRADiffusionFramework:
             tournament_state['adapters'] = next_round_adapters
             tournament_state['rounds_completed'] += 1
         
-        # Sort final database by score
-        tournament_state['lora_database'].sort(
-            key=lambda x: x.get('score', 0), 
+        # Sort final database by score and ensure unique entries
+        seen_tensors = set()
+        unique_database = []
+        for entry in tournament_state['lora_database']:
+            tensor_id = id(entry['tokens'])
+            if tensor_id not in seen_tensors:
+                seen_tensors.add(tensor_id)
+                unique_database.append(entry)
+        tournament_state['lora_database'] = sorted(
+            unique_database,
+            key=lambda x: x.get('score', 0),
             reverse=True
         )
         
@@ -214,10 +222,10 @@ class TestAdvancedLoRADiffusionFramework:
              diversity_bonus2 * 0.3) * complexity_bonus
         )
         
-        # Determine winner and loser
+        # Determine winner and loser using tensor IDs
         scores = {
-            adapter1['tokens'].tobytes(): score1,
-            adapter2['tokens'].tobytes(): score2
+            id(adapter1['tokens']): score1,
+            id(adapter2['tokens']): score2
         }
         
         return {
