@@ -107,7 +107,17 @@ class LoRAGenerator(nn.Module):
         self.meta_cognitive_state = {
             'training_iterations': [],
             'performance_metrics': [],
-            'quantum_resonance_history': []
+            'quantum_resonance_history': [],
+            'strategy_effectiveness': [],
+            'pattern_success': defaultdict(int),
+            'learning_rate_adjustments': [],
+            'consciousness_flow': []
+        }
+        
+        # Temporal investment tracking
+        self.temporal_investment = {
+            'investment_history': [],
+            'temporal_roi': {}
         }
     
     def _init_reward_model(self):
