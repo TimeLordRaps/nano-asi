@@ -4,11 +4,6 @@ from .state import ConsciousnessState
 from .tracker import ConsciousnessTracker
 
 __all__ = ['ConsciousnessState', 'ConsciousnessTracker']
-    
-    async def _analyze_activations(self, state_data: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Analyze neural activation patterns with quantum-inspired metrics."""
-        patterns = []
-        if 'activations' in state_data:
             for activation in state_data['activations']:
                 # Enhanced pattern analysis with quantum properties
                 quantum_stats = self._compute_quantum_stats(activation)
