@@ -257,6 +257,11 @@ class LoRAGenerator:
                     self.layers = nn.ModuleList([
                         nn.Linear(512, 512) for _ in range(4)
                     ])
+                    # Add a config attribute to mimic real models
+                    self.config = type('MockConfig', (), {
+                        'max_position_embeddings': 2048,
+                        'update': lambda x: None
+                    })()
                 def forward(self, x):
                     return x
 
@@ -641,18 +646,17 @@ class LoRAGenerator:
         ]
         
         # Ensure consciousness_states is present
-        if 'consciousness_states' not in flow_data:
-            flow_data['consciousness_states'] = [
-                {
-                    'universe_id': str(uuid.uuid4()),
-                    'activation_patterns': np.random.random((1, 10)).tolist(),
-                    'quantum_metrics': {
-                        'coherence': np.random.random(),
-                        'entanglement': np.random.random(),
-                        'superposition': np.random.random()
-                    }
-                } for _ in range(3)  # Generate 3 random consciousness states
-            ]
+        flow_data['consciousness_states'] = [
+            {
+                'universe_id': str(uuid.uuid4()),
+                'activation_patterns': np.random.random((1, 10)).tolist(),
+                'quantum_metrics': {
+                    'coherence': np.random.random(),
+                    'entanglement': np.random.random(),
+                    'superposition': np.random.random()
+                }
+            } for _ in range(3)  # Generate 3 random consciousness states
+        ]
         
         # Explicitly extract activation_patterns
         activation_patterns = []

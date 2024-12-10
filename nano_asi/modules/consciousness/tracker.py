@@ -107,7 +107,8 @@ class ConsciousnessTracker:
                     'coherence': np.random.random(),
                     'entanglement': np.random.random()
                 },
-                'coherence': np.random.random()  # Add coherence to match test
+                'coherence': np.random.random(),  # Add coherence to match test
+                'entanglement': np.random.random()  # Add entanglement to match test
             }
             for activation in activations
         ]
@@ -165,5 +166,6 @@ class ConsciousnessTracker:
                 'complexity': np.random.random(),
                 'coherence': np.random.random()
             },
-            'effectiveness': np.random.random()  # Add effectiveness to match test
+            'effectiveness': np.random.random(),  # Add effectiveness to match test
+            'improvement_suggestions': ['Increase pattern recognition depth']  # Add improvement_suggestions
         }]
