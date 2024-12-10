@@ -475,3 +475,158 @@ class HymbaAdapter(nn.Module):
             'consolidated_tokens': consolidated_tokens,
             'thinking_tokens': current_tokens
         }
+import torch
+import torch.nn as nn
+import math
+from typing import Dict, List, Optional, Any
+
+class HymbaAdapter(nn.Module):
+    """
+    Advanced Hymba Integration as Reflective Feedback Adapter
+    
+    Provides:
+    - Dynamic memory token processing
+    - Iterative thinking and consolidation
+    - Compute budget-aware processing
+    - Invertible token generation
+    """
+    
+    def __init__(
+        self, 
+        input_dim: int = 512, 
+        hidden_dim: int = 1024,
+        num_layers: int = 4,
+        max_sequence_length: int = 131072  # 128k tokens
+    ):
+        super().__init__()
+        
+        # Memory consolidation layers
+        self.memory_consolidation = nn.ModuleList([
+            nn.Linear(input_dim, hidden_dim) for _ in range(num_layers)
+        ])
+        
+        # Thinking layers with decreasing attention
+        self.thinking_layers = nn.ModuleList([
+            nn.Linear(hidden_dim, hidden_dim) for _ in range(num_layers)
+        ])
+        
+        # Prediction and planning layers for invertible processing
+        self.prediction_layer = nn.Linear(hidden_dim, input_dim)
+        self.planning_layer = nn.Linear(hidden_dim, input_dim)
+        
+        # Positional encoding
+        self.positional_encoding = self._create_positional_encoding(max_sequence_length, input_dim)
+        
+        # Compute budget tracking
+        self.compute_budget = 1.0  # Default full compute budget
+    
+    def _create_positional_encoding(self, max_len: int, dim: int) -> torch.Tensor:
+        """
+        Create sinusoidal positional encoding
+        
+        Args:
+            max_len: Maximum sequence length
+            dim: Embedding dimension
+        
+        Returns:
+            Positional encoding tensor
+        """
+        position = torch.arange(max_len).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, dim, 2) * -(math.log(10000.0) / dim))
+        pe = torch.zeros(max_len, dim)
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+        return pe
+    
+    def memory_consolidation_step(
+        self, 
+        memory_tokens: torch.Tensor, 
+        present_tokens: Optional[torch.Tensor] = None
+    ) -> torch.Tensor:
+        """
+        Consolidate memory tokens equally in the presence of present tokens
+        
+        Args:
+            memory_tokens: Input memory tokens
+            present_tokens: Current context tokens
+        
+        Returns:
+            Consolidated memory tokens
+        """
+        # Add positional encoding
+        memory_tokens = memory_tokens + self.positional_encoding[:memory_tokens.size(1)]
+        
+        # Attend to all memory tokens equally
+        state = memory_tokens
+        for layer in self.memory_consolidation:
+            state = torch.relu(layer(state))
+        
+        # Optional present token influence
+        if present_tokens is not None:
+            present_influence = torch.tanh(present_tokens)
+            state = state * (1 + present_influence)
+        
+        return state
+    
+    def thinking_step(self, memory_tokens: torch.Tensor) -> torch.Tensor:
+        """
+        Process memory tokens with decreasing attention to past context
+        
+        Args:
+            memory_tokens: Consolidated memory tokens
+        
+        Returns:
+            Processed thinking tokens
+        """
+        # Create attention decay mask
+        decay_mask = torch.exp(-torch.arange(memory_tokens.size(1), dtype=torch.float32) / memory_tokens.size(1))
+        
+        state = memory_tokens
+        for layer in self.thinking_layers:
+            state = torch.tanh(layer(state * decay_mask.unsqueeze(0).unsqueeze(-1)))
+        
+        return state
+    
+    def forward(
+        self, 
+        memory_tokens: torch.Tensor, 
+        coherence_tokens: Optional[torch.Tensor] = None,
+        compute_budget: Optional[float] = None
+    ) -> Dict[str, torch.Tensor]:
+        """
+        Forward pass through Hymba adapter with dynamic compute budget
+        
+        Args:
+            memory_tokens: Input memory tokens
+            coherence_tokens: Optional coherence tokens for context
+            compute_budget: Optional compute budget for thinking steps
+        
+        Returns:
+            Dictionary of processed tokens
+        """
+        # Update compute budget
+        if compute_budget is not None:
+            self.compute_budget = max(0.0, min(1.0, compute_budget))
+        
+        # Memory consolidation
+        consolidated_tokens = self.memory_consolidation_step(
+            memory_tokens, 
+            present_tokens=coherence_tokens
+        )
+        
+        # Thinking steps with dynamic compute budget
+        thinking_steps = int(self.compute_budget * 4)  # Max 4 thinking steps
+        current_tokens = consolidated_tokens
+        for _ in range(thinking_steps):
+            current_tokens = self.thinking_step(current_tokens)
+        
+        # Prediction and planning tokens
+        prediction_tokens = self.prediction_layer(current_tokens)
+        planning_tokens = self.planning_layer(current_tokens)
+        
+        return {
+            'consolidated_tokens': consolidated_tokens,
+            'thinking_tokens': current_tokens,
+            'prediction_tokens': prediction_tokens,
+            'planning_tokens': planning_tokens
+        }
