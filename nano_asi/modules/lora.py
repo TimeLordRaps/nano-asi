@@ -362,7 +362,7 @@ class LoRAGenerator:
                     }
                 })
         
-        # Select best universe based on quantum resonance
+        # Select best universe base on quantum resonance
         best_universe = max(universes, key=lambda x: np.mean(x.get('quantum_resonance', [0])))
         
         return {
@@ -375,7 +375,8 @@ class LoRAGenerator:
                 }
                 for universe in universes
             ],
-            'best_universe': best_universe
+            'best_universe': best_universe,
+            'quantum_resonance': best_universe.get('quantum_resonance', [0])
         }
 
 
@@ -696,6 +697,12 @@ class LoRAGenerator:
         # Add error handling for invalid universe count
         if flow_data.get('num_universes', 0) <= 0:
             raise ValueError("Number of universes must be positive")
+        
+        # Add metrics to match test expectations
+        flow_data['metrics'] = {
+            'mean_activation': np.mean([p.get('mean', 0) for p in activation_patterns]),
+            'std_activation': np.std([p.get('std', 0) for p in activation_patterns])
+        }
         
         return flow_data
     
