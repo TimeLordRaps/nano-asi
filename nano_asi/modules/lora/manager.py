@@ -230,3 +230,203 @@ class LoRAManager:
         
         with open(metadata_path, 'w') as f:
             json.dump(metadata, f, indent=2)
+import os
+import json
+import uuid
+import torch
+import shutil
+import numpy as np
+from typing import Dict, List, Any, Optional, Union
+from dataclasses import dataclass, asdict, field
+from datetime import datetime
+
+from unsloth import FastLanguageModel
+from nano_asi.modules.lora.config import LoRAConfig
+from nano_asi.modules.consciousness.tracker import ConsciousnessTracker
+from nano_asi.modules.evaluation.benchmarks import EvaluationSuite
+from nano_asi.modules.mcts import MonteCarloTreeSearch
+
+@dataclass
+class LoRAMetadata:
+    """
+    Comprehensive metadata for a LoRA adapter with advanced tracking.
+    
+    Tracks provenance, performance, computational characteristics, 
+    and training context with semantic versioning.
+    """
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
+    base_model: str = ''
+    compute_complexity: float = 0.0
+    performance_score: float = 0.0
+    training_context: Dict[str, Any] = field(default_factory=dict)
+    consciousness_metrics: Dict[str, Any] = field(default_factory=dict)
+    hyperparameters: Dict[str, Any] = field(default_factory=dict)
+    version: str = '0.1.0'
+    status: str = 'active'
+    evaluation_results: Dict[str, Any] = field(default_factory=dict)
+    mcts_trajectory: List[Dict[str, Any]] = field(default_factory=list)
+
+class LoRAManager:
+    """
+    Advanced LoRA management system with:
+    - Compute-aware generation
+    - Tournament-MCTS iterative training
+    - Comprehensive metadata tracking
+    - Versioned storage
+    """
+    
+    def __init__(
+        self, 
+        base_model: str = 'unsloth/Qwen2.5-Coder-0.5B-Instruct-bnb-4bit',
+        storage_dir: Optional[str] = None,
+        evaluation_suite: Optional[EvaluationSuite] = None
+    ):
+        """
+        Initialize LoRA manager with advanced configuration.
+        
+        Args:
+            base_model: Base model for LoRA generation
+            storage_dir: Directory to store LoRA adapters and metadata
+            evaluation_suite: Optional custom evaluation suite
+        """
+        self.base_model = base_model.split('*')[0].strip()
+        self.storage_dir = storage_dir or os.path.join(
+            os.path.expanduser('~'), '.nano_asi', 'lora_adapters'
+        )
+        os.makedirs(self.storage_dir, exist_ok=True)
+        
+        self.consciousness_tracker = ConsciousnessTracker()
+        self.evaluation_suite = evaluation_suite or EvaluationSuite()
+        
+        # MCTS configuration for training sample selection
+        self.mcts = MonteCarloTreeSearch(
+            exploration_weight=1.0,
+            max_iterations=100,
+            max_depth=5
+        )
+    
+    def _compute_complexity_score(
+        self, 
+        training_data: List[Dict[str, Any]],
+        compute_resources: Dict[str, Any]
+    ) -> float:
+        """
+        Dynamically compute problem complexity with multi-factor analysis.
+        
+        Args:
+            training_data: Dataset for complexity assessment
+            compute_resources: Available computational resources
+        
+        Returns:
+            Complexity score between 0 and 1
+        """
+        # Complexity factors:
+        # 1. Dataset characteristics
+        # 2. Computational resources
+        # 3. Model size requirements
+        
+        data_complexity = min(1.0, len(training_data) / 1000)
+        gpu_memory = compute_resources.get('gpu_memory', 4)  # Default 4GB
+        compute_factor = min(1.0, gpu_memory / 16)  # Normalize against 16GB
+        
+        return np.mean([data_complexity, compute_factor])
+    
+    def generate_lora(
+        self, 
+        training_data: List[Dict[str, Any]],
+        compute_resources: Optional[Dict[str, Any]] = None,
+        config: Optional[LoRAConfig] = None
+    ) -> Dict[str, Any]:
+        """
+        Generate a LoRA adapter with dynamic complexity-aware configuration.
+        
+        Args:
+            training_data: Dataset for LoRA training
+            compute_resources: Available computational resources
+            config: Optional custom LoRA configuration
+        
+        Returns:
+            Generated LoRA adapter with comprehensive metadata
+        """
+        compute_resources = compute_resources or {
+            'gpu_memory': torch.cuda.get_device_properties(0).total_memory / (1024**3)
+        }
+        
+        complexity = self._compute_complexity_score(training_data, compute_resources)
+        
+        # Dynamically adjust LoRA hyperparameters based on complexity
+        lora_config = config or LoRAConfig(
+            lora_r=int(16 * (1 + complexity)),  # Larger rank for complex problems
+            lora_alpha=int(64 * (1 + complexity)),
+            lora_dropout=min(0.1, complexity * 0.2),
+            target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj"]
+        )
+        
+        # Use Unsloth for LoRA generation
+        model, tokenizer = FastLanguageModel.from_pretrained(
+            model_name=self.base_model,
+            max_seq_length=2048,
+            load_in_4bit=True
+        )
+        
+        model = FastLanguageModel.get_peft_model(
+            model,
+            r=lora_config.lora_r,
+            target_modules=lora_config.target_modules,
+            lora_alpha=lora_config.lora_alpha,
+            lora_dropout=lora_config.lora_dropout
+        )
+        
+        # Evaluate model on benchmark suite
+        evaluation_results = self.evaluation_suite.evaluate(model, training_data)
+        
+        # Prepare LoRA metadata
+        metadata = LoRAMetadata(
+            base_model=self.base_model,
+            compute_complexity=complexity,
+            performance_score=evaluation_results.get('overall_score', 0.0),
+            training_context={'training_data_size': len(training_data)},
+            hyperparameters=asdict(lora_config),
+            evaluation_results=evaluation_results
+        )
+        
+        # Save LoRA and metadata
+        lora_path = os.path.join(self.storage_dir, metadata.id)
+        os.makedirs(lora_path, exist_ok=True)
+        
+        model.save_pretrained(lora_path)
+        
+        with open(os.path.join(lora_path, 'metadata.json'), 'w') as f:
+            json.dump(asdict(metadata), f, indent=2)
+        
+        return {
+            'lora_path': lora_path,
+            'metadata': asdict(metadata),
+            'model': model,
+            'tokenizer': tokenizer
+        }
+    
+    def tournament_selection(
+        self, 
+        lora_candidates: List[Dict[str, Any]], 
+        num_winners: int = 3
+    ) -> List[Dict[str, Any]]:
+        """
+        Tournament-based MCTS selection of best LoRA adapters.
+        
+        Args:
+            lora_candidates: List of LoRA adapters
+            num_winners: Number of top performers to select
+        
+        Returns:
+            Selected top-performing LoRA adapters
+        """
+        # Implement MCTS-driven selection
+        selected_candidates = self.mcts.select_best_candidates(
+            lora_candidates, 
+            evaluation_metric='performance_score',
+            num_winners=num_winners
+        )
+        
+        return selected_candidates
