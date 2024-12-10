@@ -5,17 +5,21 @@ from pydantic import BaseModel, Field
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from diffusers import DDPMScheduler
 import time
 import numpy as np
 import uuid
 from collections import defaultdict
 
+# Unsloth imports
+from unsloth import FastLanguageModel
+from transformers import AutoTokenizer, TrainingArguments
+from trl import SFTTrainer, DPOTrainer
+
 # Import MAX_SEQ_LENGTH from core configuration
 from nano_asi.core.config import Config
 
 # Use the default max sequence length from the configuration
-MAX_SEQ_LENGTH = Config().model_config.get('max_seq_length', 128000)
+MAX_SEQ_LENGTH = Config().model_config.get('max_seq_length', 4096)
 
 class LoRAConfig(BaseModel):
     """Configuration for LoRA generation with enhanced Unsloth-inspired parameters.
@@ -314,49 +318,77 @@ class LoRAGenerator(nn.Module):
 
     async def generate_lora_adapter(
         self, 
-        conditional_tokens: Optional[torch.Tensor] = None,
+        base_model_name: str = "unsloth/Qwen2.5-Coder-1.5B-Instruct",
         consciousness_tracker: Optional[Any] = None
     ) -> Dict[str, Any]:
-        if conditional_tokens is None:
-            raise ValueError("Conditional tokens must be provided")
-            
-        if len(conditional_tokens) == 0:
-            raise ValueError("Conditional tokens cannot be empty")
+        """
+        Generate a LoRA adapter using Unsloth's optimized approach.
         
-        # Ensure params have correct shapes
-        params = {
-            'lora_r': torch.randn(self.hyperparameters['lora_r'], self.hyperparameters['lora_r']),
-            'lora_alpha': torch.full((self.hyperparameters['lora_r'],), self.hyperparameters['lora_alpha'], dtype=torch.float32),
-            'lora_dropout': torch.full((self.hyperparameters['lora_r'],), self.hyperparameters['lora_dropout'], dtype=torch.float32),
-            'weight_matrix': torch.randn(self.hyperparameters['lora_r'], self.config.output_dim)
-        }
+        Args:
+            base_model_name: Base model to use for LoRA generation
+            consciousness_tracker: Optional consciousness tracking module
+        
+        Returns:
+            Dict containing LoRA adapter details
+        """
+        # Initialize Unsloth model with LoRA
+        model, tokenizer = FastLanguageModel.from_pretrained(
+            model_name=base_model_name,
+            max_seq_length=self.config.max_seq_length,
+            dtype=None,  # Auto-detect optimal dtype
+            load_in_4bit=True,
+        )
+        
+        # Add LoRA adapters
+        model = FastLanguageModel.get_peft_model(
+            model,
+            r=self.config.lora_r,
+            target_modules=self.config.target_modules,
+            lora_alpha=self.config.lora_alpha,
+            lora_dropout=self.config.lora_dropout,
+            bias="none",
+            use_gradient_checkpointing="unsloth",
+            random_state=42,
+        )
         
         # Track consciousness flow if tracker is provided
         consciousness_flow = None
         if consciousness_tracker:
             consciousness_flow = await consciousness_tracker.track_consciousness({
-                'activations': [{'values': conditional_tokens}]
+                'model_details': {
+                    'base_model': base_model_name,
+                    'lora_config': {
+                        'r': self.config.lora_r,
+                        'alpha': self.config.lora_alpha,
+                        'dropout': self.config.lora_dropout
+                    }
+                }
             })
-            
+        
         # Convert consciousness flow to a list if it's a single state
         if consciousness_flow and not isinstance(consciousness_flow, list):
             consciousness_flow = [consciousness_flow]
         
         # Generate quantum resonance scores
-        quantum_resonance = torch.rand(self.hyperparameters['lora_r']).tolist()
+        quantum_resonance = torch.rand(self.config.lora_r).tolist()
         
+        # Prepare adapter metadata
         adapter = {
-            'tokens': conditional_tokens,
-            'params': params,
+            'model': model,
+            'tokenizer': tokenizer,
+            'base_model_name': base_model_name,
             'metadata': {
                 'timestamp': time.time(),
-                'consciousness_integrated': consciousness_tracker is not None
+                'consciousness_integrated': consciousness_tracker is not None,
+                'lora_config': {
+                    'r': self.config.lora_r,
+                    'alpha': self.config.lora_alpha,
+                    'dropout': self.config.lora_dropout,
+                    'target_modules': self.config.target_modules
+                }
             },
             'consciousness_flow': consciousness_flow or [],
             'improvement_history': [],
-            'universe_results': [],
-            'patterns': [],
-            'optimization_history': [],
             'quantum_resonance': quantum_resonance
         }
         
