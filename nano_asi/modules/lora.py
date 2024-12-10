@@ -15,6 +15,9 @@ from unsloth import FastLanguageModel
 from transformers import AutoTokenizer, TrainingArguments
 from trl import SFTTrainer, DPOTrainer
 
+# Diffusers import for noise scheduler
+from diffusers import DDPMScheduler
+
 # Import MAX_SEQ_LENGTH from core configuration
 from nano_asi.core.config import Config
 
