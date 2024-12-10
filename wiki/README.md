@@ -67,7 +67,7 @@ NanoASI is an advanced framework for building recursive self-improving AI system
 
 ### Getting Started
 - [Installation](Getting_Started/Installation.md)
-- [Quickstart Guide](Getting_Started/Quickstart.md)
+- [Quickstart Guide](Quickstart.md)
 - [Basic Usage](Tutorials/Basic_Usage.md)
 
 ### Core Concepts
@@ -76,10 +76,10 @@ NanoASI is an advanced framework for building recursive self-improving AI system
 - [Design Principles](Design_Principles.md)
 
 ### Components
-- [ASI Core](Components/ASI.md)
-- [Consciousness Tracker](Components/Consciousness.md)
-- [MCTS Engine](Components/MCTS.md)
-- [LoRA Generator](Components/LoRA.md)
+- [ASI Core](Components/Overview.md#asi-advanced-self-improving-system)
+- [Consciousness Tracker](Components/Overview.md#consciousness-tracker)
+- [MCTS Engine](Components/Overview.md#mcts-engine)
+- [LoRA Generator](Components/Overview.md#lora-generator)
 
 ### Advanced Topics
 - [Configuration](Advanced/Configuration.md)
