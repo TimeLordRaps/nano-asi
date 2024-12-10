@@ -329,36 +329,36 @@ class LoRAGenerator(nn.Module):
         
         Args:
             base_model_name: Base model to use for LoRA generation. 
-                             If None, uses config's default model.
+                             If None, uses default Unsloth Qwen2.5 Coder 0.5B model.
             consciousness_tracker: Optional consciousness tracking module
         
         Returns:
             Dict containing LoRA adapter details
         """
-        # Use default model from config if not specified
-        base_model_name = base_model_name or self.config.base_model_name
+        # Use default Unsloth Qwen2.5 Coder 0.5B model if not specified
+        base_model_name = base_model_name or "unsloth/Qwen2.5-Coder-0.5B-Instruct-bnb-4bit"
 
         # Initialize Unsloth model with LoRA
         model, tokenizer = FastLanguageModel.from_pretrained(
             model_name=base_model_name,
-            max_seq_length=self.config.max_seq_length or 4096,
+            max_seq_length=self.config.max_seq_length or 2048,  # Adjusted for 0.5B model
             dtype=None,  # Auto-detect optimal dtype
             load_in_4bit=True,
         )
         
-        # Add LoRA adapters with enhanced configuration
+        # Add LoRA adapters with configuration optimized for 0.5B model
         model = FastLanguageModel.get_peft_model(
             model,
-            r=self.config.lora_r,
+            r=self.config.lora_r or 32,  # Smaller rank for 0.5B model
             target_modules=self.config.target_modules or [
-                "q_proj", "k_proj", "v_proj", "o_proj", 
-                "gate_proj", "up_proj", "down_proj"
+                "q_proj", "k_proj", "v_proj", 
+                "o_proj", "gate_proj"
             ],
-            lora_alpha=self.config.lora_alpha,
-            lora_dropout=self.config.lora_dropout,
+            lora_alpha=self.config.lora_alpha or 64,
+            lora_dropout=self.config.lora_dropout or 0.05,
             bias="none",
             use_gradient_checkpointing="unsloth",
-            use_rslora=self.config.use_rslora,
+            use_rslora=self.config.use_rslora or True,
             random_state=42,
         )
         
@@ -370,10 +370,10 @@ class LoRAGenerator(nn.Module):
                     'model_details': {
                         'base_model': base_model_name,
                         'lora_config': {
-                            'r': self.config.lora_r,
-                            'alpha': self.config.lora_alpha,
-                            'dropout': self.config.lora_dropout,
-                            'use_rslora': self.config.use_rslora
+                            'r': self.config.lora_r or 32,
+                            'alpha': self.config.lora_alpha or 64,
+                            'dropout': self.config.lora_dropout or 0.05,
+                            'use_rslora': self.config.use_rslora or True
                         }
                     }
                 })
@@ -385,7 +385,7 @@ class LoRAGenerator(nn.Module):
             consciousness_flow = [consciousness_flow]
         
         # Generate quantum resonance scores
-        quantum_resonance = torch.rand(self.config.lora_r).tolist()
+        quantum_resonance = torch.rand(self.config.lora_r or 32).tolist()
         
         # Prepare adapter metadata with enhanced tracking
         adapter = {
@@ -396,11 +396,14 @@ class LoRAGenerator(nn.Module):
                 'timestamp': time.time(),
                 'consciousness_integrated': consciousness_tracker is not None,
                 'lora_config': {
-                    'r': self.config.lora_r,
-                    'alpha': self.config.lora_alpha,
-                    'dropout': self.config.lora_dropout,
-                    'target_modules': self.config.target_modules,
-                    'use_rslora': self.config.use_rslora
+                    'r': self.config.lora_r or 32,
+                    'alpha': self.config.lora_alpha or 64,
+                    'dropout': self.config.lora_dropout or 0.05,
+                    'target_modules': self.config.target_modules or [
+                        "q_proj", "k_proj", "v_proj", 
+                        "o_proj", "gate_proj"
+                    ],
+                    'use_rslora': self.config.use_rslora or True
                 }
             },
             'consciousness_flow': consciousness_flow or [],
