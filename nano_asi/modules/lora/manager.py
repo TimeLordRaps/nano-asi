@@ -435,7 +435,8 @@ import json
 import uuid
 import torch
 import numpy as np
-from typing import Dict, List, Any, Optional
+import networkx as nx
+from typing import Dict, List, Any, Optional, Union
 from dataclasses import dataclass, asdict, field
 from datetime import datetime
 
@@ -445,13 +446,30 @@ from nano_asi.modules.consciousness.tracker import ConsciousnessTracker
 from nano_asi.modules.evaluation.benchmarks import EvaluationSuite
 from nano_asi.modules.mcts import MonteCarloTreeSearch
 from nano_asi.modules.tournament import TournamentSelection
+from nano_asi.modules.storage import ModelVersionController
+
+@dataclass
+class LoRATrainingTrajectory:
+    """
+    Represents the complete training trajectory of a LoRA adapter.
+    
+    Tracks the evolution, performance, and decision-making process 
+    throughout the training lifecycle.
+    """
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    root_model_id: Optional[str] = None
+    parent_model_id: Optional[str] = None
+    training_stages: List[Dict[str, Any]] = field(default_factory=list)
+    performance_graph: Dict[str, Any] = field(default_factory=dict)
+    pruning_metadata: Dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class LoRAMetadata:
     """
     Comprehensive metadata for LoRA adapters with advanced tracking.
     
-    Captures the entire lifecycle and evolution of a LoRA adapter.
+    Captures the entire lifecycle, evolution, and semantic versioning 
+    of a LoRA adapter.
     """
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
@@ -466,6 +484,7 @@ class LoRAMetadata:
     evaluation_results: Dict[str, Any] = field(default_factory=dict)
     mcts_trajectory: List[Dict[str, Any]] = field(default_factory=list)
     diffusion_metadata: Optional[Dict[str, Any]] = None
+    training_trajectory: Optional[LoRATrainingTrajectory] = None
 
 class LoRAManager:
     """
@@ -474,13 +493,15 @@ class LoRAManager:
     - Iterative DPO training
     - MCTS-driven sample selection
     - Comprehensive metadata tracking
+    - Semantic versioning and model evolution tracking
     """
     
     def __init__(
         self, 
         base_model: str = 'unsloth/Qwen2.5-Coder-0.5B-Instruct-bnb-4bit',
         storage_dir: Optional[str] = None,
-        evaluation_suite: Optional[EvaluationSuite] = None
+        evaluation_suite: Optional[EvaluationSuite] = None,
+        version_controller: Optional[ModelVersionController] = None
     ):
         """
         Initialize LoRA manager with advanced configuration.
@@ -489,6 +510,7 @@ class LoRAManager:
             base_model: Base model for LoRA generation
             storage_dir: Directory to store LoRA adapters
             evaluation_suite: Optional custom evaluation suite
+            version_controller: Optional model version tracking system
         """
         self.base_model = base_model.split('*')[0].strip()
         self.storage_dir = storage_dir or os.path.join(
@@ -508,6 +530,11 @@ class LoRAManager:
         
         # Tournament selection for model comparison
         self.tournament = TournamentSelection()
+        
+        # Model version and trajectory tracking
+        self.version_controller = version_controller or ModelVersionController(
+            storage_dir=self.storage_dir
+        )
     
     def _compute_complexity_score(
         self, 
