@@ -111,7 +111,7 @@ class TestDiffusionWorkflow:
         for _ in range(num_adapters):
             # Generate adapter with consciousness tracking
             adapter = await generator.generate_lora_adapter(
-                conditional_tokens=torch.randn(1, 128, 64, device=generator.config.device),
+                conditional_tokens=torch.randn(1, 128, 64, device=torch.device("cuda" if torch.cuda.is_available() else "cpu")),
                 consciousness_tracker=tracker
             )
             

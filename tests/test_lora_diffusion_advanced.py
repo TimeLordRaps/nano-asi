@@ -100,7 +100,8 @@ class TestAdvancedLoRADiffusionFramework:
         # Generate initial adapters
         initial_adapters = []
         for _ in range(num_initial_adapters):
-            conditional_tokens = torch.randn(1, 128, 64, device=lora_generator.config.device)
+            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            conditional_tokens = torch.randn(1, 128, 64, device=device)
             adapter = await lora_generator.generate_lora_adapter(
                 conditional_tokens=conditional_tokens
             )
@@ -428,7 +429,8 @@ class TestAdvancedLoRADiffusionFramework:
         num_adapters = 10
         initial_adapters = []
         for _ in range(num_adapters):
-            conditional_tokens = torch.randn(1, 128, 64, device=lora_generator.device)
+            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            conditional_tokens = torch.randn(1, 128, 64, device=device)
             adapter = await lora_generator.generate_lora_adapter(
                 conditional_tokens=conditional_tokens
             )
