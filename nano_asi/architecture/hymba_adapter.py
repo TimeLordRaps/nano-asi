@@ -84,14 +84,16 @@ class HymbaAdapter(nn.Module):
     def forward(
         self, 
         memory_tokens: torch.Tensor, 
-        coherence_tokens: Optional[torch.Tensor] = None
+        present_tokens: Optional[torch.Tensor] = None,
+        compute_budget: Optional[float] = None
     ) -> Dict[str, torch.Tensor]:
         """
         Forward pass through Hymba adapter
         
         Args:
             memory_tokens: Input memory tokens
-            coherence_tokens: Optional coherence tokens
+            present_tokens: Current context tokens
+            compute_budget: Optional compute budget for thinking steps
         
         Returns:
             Dictionary of processed tokens
@@ -101,7 +103,7 @@ class HymbaAdapter(nn.Module):
             self.compute_budget = max(0.0, min(1.0, compute_budget))
         
         # Memory consolidation
-        consolidated_tokens = self.memory_consolidation_step(memory_tokens, present_tokens)
+        consolidated_tokens = self.memory_consolidation_step(memory_tokens, present_tokens or memory_tokens)
         
         # Thinking steps with dynamic compute budget
         thinking_steps = int(self.compute_budget * 4)  # Max 4 thinking steps
