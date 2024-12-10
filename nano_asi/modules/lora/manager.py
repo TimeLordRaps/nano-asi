@@ -14,51 +14,76 @@ from nano_asi.modules.consciousness.tracker import ConsciousnessTracker
 @dataclass
 class LoRAMetadata:
     """
-    Comprehensive metadata for a LoRA adapter.
+    Comprehensive metadata for LoRA adapters with advanced tracking.
     
-    Tracks provenance, performance, and computational characteristics.
+    Captures the entire lifecycle, evolution, and semantic versioning 
+    of a LoRA adapter.
     """
-    id: str
-    timestamp: str
-    base_model: str
-    compute_complexity: float
-    performance_score: float
-    training_context: Dict[str, Any]
-    consciousness_metrics: Dict[str, Any]
-    hyperparameters: Dict[str, Any]
-    version: str = '1.0'
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
+    base_model: str = ''
+    compute_complexity: float = 0.0
+    performance_score: float = 0.0
+    training_context: Dict[str, Any] = field(default_factory=dict)
+    consciousness_metrics: Dict[str, Any] = field(default_factory=dict)
+    hyperparameters: Dict[str, Any] = field(default_factory=dict)
+    version: str = '0.1.0'
     status: str = 'active'
+    evaluation_results: Dict[str, Any] = field(default_factory=dict)
+    mcts_trajectory: List[Dict[str, Any]] = field(default_factory=list)
+    diffusion_metadata: Optional[Dict[str, Any]] = None
+    training_trajectory: Optional[LoRATrainingTrajectory] = None
+    semantic_tags: List[str] = field(default_factory=list)
 
 class LoRAManager:
     """
-    Manages the lifecycle of LoRA adapters with advanced tracking and storage.
-    
-    Handles:
-    - Local storage and versioning
-    - Compute-aware LoRA generation
-    - Metadata tracking
-    - Tournament-based selection
+    Advanced LoRA management system with:
+    - Dynamic compute-aware LoRA generation
+    - Iterative DPO training
+    - MCTS-driven sample selection
+    - Comprehensive metadata tracking
+    - Semantic versioning and model evolution tracking
     """
     
     def __init__(
         self, 
         base_model: str = 'unsloth/Qwen2.5-Coder-0.5B-Instruct-bnb-4bit',
-        storage_dir: Optional[str] = None
+        storage_dir: Optional[str] = None,
+        evaluation_suite: Optional[EvaluationSuite] = None,
+        version_controller: Optional[ModelVersionController] = None
     ):
         """
-        Initialize LoRA manager with configurable storage and base model.
+        Initialize LoRA manager with advanced configuration.
         
         Args:
-            base_model: Unsloth base model for LoRA generation
-            storage_dir: Directory to store LoRA adapters and metadata
+            base_model: Base model for LoRA generation
+            storage_dir: Directory to store LoRA adapters
+            evaluation_suite: Optional custom evaluation suite
+            version_controller: Optional model version tracking system
         """
-        self.base_model = base_model
+        self.base_model = base_model.split('*')[0].strip()
         self.storage_dir = storage_dir or os.path.join(
             os.path.expanduser('~'), '.nano_asi', 'lora_adapters'
         )
         os.makedirs(self.storage_dir, exist_ok=True)
         
         self.consciousness_tracker = ConsciousnessTracker()
+        self.evaluation_suite = evaluation_suite or EvaluationSuite()
+        
+        # MCTS configuration for training sample selection
+        self.mcts = MonteCarloTreeSearch(
+            exploration_weight=1.0,
+            max_iterations=100,
+            max_depth=5
+        )
+        
+        # Tournament selection for model comparison
+        self.tournament = TournamentSelection()
+        
+        # Model version and trajectory tracking
+        self.version_controller = version_controller or ModelVersionController(
+            storage_dir=self.storage_dir
+        )
     
     def _compute_complexity_score(
         self, 
