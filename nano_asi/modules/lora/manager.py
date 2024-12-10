@@ -3,13 +3,35 @@ import json
 import uuid
 import torch
 import shutil
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass, asdict
+import numpy as np
+import networkx as nx
+from typing import Dict, List, Any, Optional, Union
+from dataclasses import dataclass, asdict, field
 from datetime import datetime
 
 from unsloth import FastLanguageModel
 from nano_asi.modules.lora.config import LoRAConfig
 from nano_asi.modules.consciousness.tracker import ConsciousnessTracker
+from nano_asi.modules.evaluation.benchmarks import EvaluationSuite
+from nano_asi.modules.mcts import MonteCarloTreeSearch
+from nano_asi.modules.tournament import TournamentSelection
+from nano_asi.modules.storage import ModelVersionController
+
+@dataclass
+class LoRATrainingTrajectory:
+    """
+    Represents the complete training trajectory of a LoRA adapter.
+    
+    Tracks the evolution, performance, and decision-making process 
+    throughout the training lifecycle.
+    """
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    root_model_id: Optional[str] = None
+    parent_model_id: Optional[str] = None
+    training_stages: List[Dict[str, Any]] = field(default_factory=list)
+    performance_graph: Dict[str, Any] = field(default_factory=dict)
+    pruning_metadata: Dict[str, Any] = field(default_factory=dict)
+    semantic_tags: List[str] = field(default_factory=list)
 
 @dataclass
 class LoRAMetadata:
