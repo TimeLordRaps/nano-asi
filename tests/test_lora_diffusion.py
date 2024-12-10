@@ -12,30 +12,40 @@ from nano_asi.core import Config
 class TestLoRADiffusionFramework:
     @pytest.fixture
     def base_model_config(self):
-        """Configuration for Unsloth Qwen2.5 Coder model."""
+        """Configuration for Unsloth Qwen2.5 Coder 0.5B model."""
         return {
-            'model_name': 'unsloth/Qwen2.5-Coder-1.5B-Instruct',
+            'model_name': 'unsloth/Qwen2.5-Coder-0.5B-Instruct',
             'base_model_type': 'transformer',
             'task_domains': ['code', 'instruction', 'reasoning'],
-            'max_seq_length': 4096,
-            'precision': 'float16'
+            'max_seq_length': 2048,  # Reduced for 0.5B model
+            'precision': 'float16',
+            'batch_size': 4,  # Smaller batches for faster iteration
+            'gradient_checkpointing': True,  # Memory efficiency
+            'flash_attention': True  # Performance optimization
         }
 
     @pytest.fixture
     def lora_generator(self, base_model_config):
-        """Create a LoRA generator with advanced configuration."""
+        """Create a LoRA generator optimized for 0.5B model."""
         config = LoRAConfig(
-            input_dim=768,  # Approximate for Qwen2.5
-            hidden_dim=2048,
-            output_dim=768,
-            num_layers=6,
-            lora_r=64,
-            lora_alpha=128,
-            lora_dropout=0.1,
+            input_dim=512,  # Adjusted for 0.5B model
+            hidden_dim=1024,
+            output_dim=512,
+            num_layers=4,  # Reduced for faster iteration
+            lora_r=32,  # Smaller rank for quicker training
+            lora_alpha=64,
+            lora_dropout=0.05,
             target_modules=[
                 "q_proj", "k_proj", "v_proj", 
-                "o_proj", "gate_proj", "up_proj", "down_proj"
-            ]
+                "o_proj", "gate_proj"
+            ],
+            num_diffusion_steps=500,  # Reduced steps
+            learning_rate=1e-4,
+            warmup_steps=100,
+            scheduler_type="cosine",
+            use_8bit_quantization=True,
+            use_flash_attention=True,
+            gradient_checkpointing=True
         )
         return LoRAGenerator(config)
 
@@ -115,29 +125,61 @@ class TestLoRADiffusionFramework:
 
     async def _compare_adapters(self, adapter1: Dict[str, Any], adapter2: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Compare two LoRA adapters using multi-dimensional scoring.
+        Enhanced adapter comparison with comprehensive metrics.
         
         Evaluates:
-        - Quantum resonance
+        - Quantum resonance & stability
         - Consciousness flow coherence
         - Adaptation potential
         - Diversity metrics
+        - Training efficiency
+        - Memory usage
+        - Inference speed
         """
-        # Compute quantum resonance scores using PyTorch
+        # Core metrics
         resonance1 = torch.mean(torch.tensor(adapter1.get('quantum_resonance', [0.0])))
         resonance2 = torch.mean(torch.tensor(adapter2.get('quantum_resonance', [0.0])))
         
-        # Evaluate consciousness flow coherence
+        # Enhanced coherence metrics
         coherence1 = self._compute_flow_coherence(adapter1)
         coherence2 = self._compute_flow_coherence(adapter2)
         
-        # Compute adaptation potential
+        # Advanced adaptation metrics
         adaptation1 = self._compute_adaptation_potential(adapter1)
         adaptation2 = self._compute_adaptation_potential(adapter2)
         
-        # Compute composite score
-        score1 = resonance1 * 0.3 + coherence1 * 0.3 + adaptation1 * 0.4
-        score2 = resonance2 * 0.3 + coherence2 * 0.3 + adaptation2 * 0.4
+        # Performance metrics
+        perf1 = self._compute_performance_metrics(adapter1)
+        perf2 = self._compute_performance_metrics(adapter2)
+        
+        # Efficiency metrics
+        efficiency1 = self._compute_efficiency_score(adapter1)
+        efficiency2 = self._compute_efficiency_score(adapter2)
+        
+        # Weighted scoring
+        weights = {
+            'resonance': 0.25,
+            'coherence': 0.20,
+            'adaptation': 0.20,
+            'performance': 0.20,
+            'efficiency': 0.15
+        }
+        
+        score1 = (
+            resonance1 * weights['resonance'] +
+            coherence1 * weights['coherence'] +
+            adaptation1 * weights['adaptation'] +
+            perf1 * weights['performance'] +
+            efficiency1 * weights['efficiency']
+        )
+        
+        score2 = (
+            resonance2 * weights['resonance'] +
+            coherence2 * weights['coherence'] +
+            adaptation2 * weights['adaptation'] +
+            perf2 * weights['performance'] +
+            efficiency2 * weights['efficiency']
+        )
         
         return {
             'winner': adapter1 if score1 > score2 else adapter2,
@@ -280,3 +322,47 @@ class TestLoRADiffusionFramework:
         assert hasattr(lora_generator, 'meta_cognitive_state')
         assert 'strategy_effectiveness' in lora_generator.meta_cognitive_state
         assert 'exploration_history' in lora_generator.meta_cognitive_state
+    def _compute_performance_metrics(self, adapter: Dict[str, Any]) -> float:
+        """Compute comprehensive performance metrics."""
+        metrics = adapter.get('performance_metrics', {})
+        
+        # Training metrics
+        train_loss = metrics.get('training_loss', 1.0)
+        convergence_rate = metrics.get('convergence_rate', 0.0)
+        
+        # Inference metrics
+        inference_time = metrics.get('inference_time_ms', 100.0)
+        normalized_inference = 1.0 / (1.0 + inference_time/100)  # Normalize to 0-1
+        
+        # Memory efficiency
+        memory_usage = metrics.get('peak_memory_mb', 1000.0)
+        normalized_memory = 1.0 / (1.0 + memory_usage/1000)
+        
+        return float(np.mean([
+            1.0 - min(train_loss, 1.0),  # Lower loss is better
+            convergence_rate,
+            normalized_inference,
+            normalized_memory
+        ]))
+
+    def _compute_efficiency_score(self, adapter: Dict[str, Any]) -> float:
+        """Compute training and inference efficiency score."""
+        metrics = adapter.get('efficiency_metrics', {})
+        
+        # Training efficiency
+        steps_per_second = metrics.get('training_steps_per_second', 0.0)
+        normalized_steps = min(steps_per_second / 10.0, 1.0)  # Normalize to 0-1
+        
+        # Parameter efficiency
+        param_count = metrics.get('parameter_count', 1e6)
+        param_efficiency = 1.0 / (1.0 + np.log10(param_count/1e5))
+        
+        # Memory efficiency during training
+        gpu_utilization = metrics.get('gpu_utilization', 100.0)
+        memory_efficiency = 1.0 - (gpu_utilization / 100.0)
+        
+        return float(np.mean([
+            normalized_steps,
+            param_efficiency,
+            memory_efficiency
+        ]))
