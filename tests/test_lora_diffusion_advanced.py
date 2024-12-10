@@ -366,17 +366,30 @@ class TestAdvancedLoRADiffusionFramework:
     async def test_diffusion_model_training_workflow(self, lora_generator):
         """
         Test the workflow of training a diffusion model using the LoRA database.
-        
+
         Validates:
         - LoRA database generation
         - Diffusion model training process
         - MCTS-style adapter selection
         """
-        # Generate LoRA database
-        database_generation = await self.test_iterative_lora_database_generation(lora_generator)
+        # Generate initial adapters for database
+        num_adapters = 10
+        initial_adapters = []
+        for _ in range(num_adapters):
+            conditional_tokens = torch.randn(1, 128, 64)
+            adapter = await lora_generator.generate_lora_adapter(
+                conditional_tokens=conditional_tokens
+            )
+            initial_adapters.append(adapter)
+        
+        # Conduct tournament to build database
+        tournament_results = await self._conduct_comprehensive_tournament(
+            initial_adapters,
+            rounds=3
+        )
         
         # Extract top LoRAs for diffusion model training
-        top_loras = database_generation['lora_database'][:5]  # Top 5 LoRAs
+        top_loras = tournament_results['lora_database'][:5]  # Top 5 LoRAs
         
         # Simulate diffusion model training
         diffusion_training_results = await self._train_diffusion_model(

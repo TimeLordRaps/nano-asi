@@ -102,9 +102,9 @@ class TestLoRADiffusionFramework:
                     # Compare adapters and store result
                     comparison = await self._compare_adapters(adapters[i], adapters[i+1])
                     winner = comparison['winner']
-                    # Add winner if unique
-                    if not any(torch.equal(winner['tokens'], existing['tokens']) for existing in winners):
-                        winner['score'] = comparison['scores']['adapter1' if winner == adapters[i] else 'adapter2']
+                    # Add winner if unique using tensor ID comparison
+                    if not any(id(winner['tokens']) == id(existing['tokens']) for existing in winners):
+                        winner['score'] = comparison['scores']['adapter1' if id(winner['tokens']) == id(adapters[i]['tokens']) else 'adapter2']
                         winners.append(winner)
         
         return {
