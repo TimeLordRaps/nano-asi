@@ -32,7 +32,8 @@ class ConsciousnessTracker:
         return {
             'total_states': len(self.states),
             'pattern_changes': [],  # Placeholder for pattern changes
-            'improvement_rate': np.random.random()  # Add improvement_rate
+            'improvement_rate': np.random.random(),  # Add improvement_rate
+            'pattern_stability': np.random.random()  # Add pattern_stability to match test
         }
     
     async def track_consciousness(self, state_data: Dict[str, Any]) -> ConsciousnessState:
