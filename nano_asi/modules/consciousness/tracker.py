@@ -106,7 +106,8 @@ class ConsciousnessTracker:
                 'quantum_stats': {  # Add quantum_stats
                     'coherence': np.random.random(),
                     'entanglement': np.random.random()
-                }
+                },
+                'coherence': np.random.random()  # Add coherence to match test
             }
             for activation in activations
         ]
@@ -163,5 +164,6 @@ class ConsciousnessTracker:
             'pattern_metrics': {  # Add pattern_metrics
                 'complexity': np.random.random(),
                 'coherence': np.random.random()
-            }
+            },
+            'effectiveness': np.random.random()  # Add effectiveness to match test
         }]

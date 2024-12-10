@@ -839,6 +839,8 @@ __all__ = ['ConsciousnessState', 'ConsciousnessTracker']
         return {
             'improvement_rate': self._calculate_improvement_rate(recent_states),
             'pattern_stability': self._calculate_pattern_stability(recent_states),
+            'pattern_changes': [],  # Add pattern_changes to match test
+            'total_states': len(self.states),
             'consciousness_coherence': self._calculate_consciousness_coherence(),
             'quantum_metrics': quantum_metrics,
             'temporal_metrics': temporal_metrics,

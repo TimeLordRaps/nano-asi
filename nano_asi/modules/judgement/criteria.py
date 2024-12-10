@@ -20,9 +20,9 @@ class ComplexityCriteria(JudgementCriteria):
         complexity1 = self.evaluate(candidate1)
         complexity2 = self.evaluate(candidate2)
         
-        if complexity1 > complexity2:
+        if complexity1 < complexity2:
             return 1
-        elif complexity1 < complexity2:
+        elif complexity1 > complexity2:
             return -1
         return 0
     

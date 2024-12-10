@@ -23,6 +23,12 @@ class MockModel(nn.Module):
         self.max_seq_length = max_seq_length
         self.input_dim = input_dim
         self.output_dim = output_dim
+        
+        # Add a config attribute with necessary properties
+        self.config = type('MockConfig', (), {
+            'max_position_embeddings': max_seq_length,
+            'update': lambda x: None
+        })()
     
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
