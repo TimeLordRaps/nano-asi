@@ -56,8 +56,8 @@ class LoRAGenerator:
             Dict containing LoRA adapter details and metadata.
         """
         # Validate input
-        if conditional_tokens is None:
-            raise ValueError("Conditional tokens must be provided")
+        if conditional_tokens is None or len(conditional_tokens) == 0:
+            raise ValueError("Conditional tokens must be provided and non-empty")
 
         # Use provided or default base model
         model_name = base_model_name or self.base_model_name
@@ -65,8 +65,8 @@ class LoRAGenerator:
         # Load model with LoRA configuration
         model, tokenizer = FastLanguageModel.from_pretrained(
             model_name = model_name,
-            max_seq_length = self.config.get('max_seq_length', 2048),
-            dtype = self.config.get('dtype', torch.float16),
+            max_seq_length = getattr(self.config, 'max_seq_length', 2048),
+            dtype = getattr(self.config, 'dtype', torch.float16),
             load_in_4bit = True
         )
 
