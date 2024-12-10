@@ -81,7 +81,7 @@ class TestAdvancedLoRADiffusionFramework:
         # Generate initial adapters
         initial_adapters = []
         for _ in range(num_initial_adapters):
-            conditional_tokens = torch.randn(1, 128, 64, device=self.device)
+            conditional_tokens = torch.randn(1, 128, 64, device=lora_generator.config.device)
             adapter = await lora_generator.generate_lora_adapter(
                 conditional_tokens=conditional_tokens
             )

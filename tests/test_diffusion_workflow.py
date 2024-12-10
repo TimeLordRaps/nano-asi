@@ -38,6 +38,7 @@ class TestDiffusionWorkflow:
     def lora_config(self, device):
         """Optimized LoRA config for 0.5B model."""
         return LoRAConfig(
+            device=device,  # Add device to config
             input_dim=512,
             hidden_dim=1024,
             output_dim=512,
@@ -110,7 +111,7 @@ class TestDiffusionWorkflow:
         for _ in range(num_adapters):
             # Generate adapter with consciousness tracking
             adapter = await generator.generate_lora_adapter(
-                conditional_tokens=torch.randn(1, 128, 64, device=generator.device),
+                conditional_tokens=torch.randn(1, 128, 64, device=generator.config.device),
                 consciousness_tracker=tracker
             )
             
