@@ -300,11 +300,11 @@ class TestAdvancedLoRADiffusionFramework:
             adapter1['tokens'].mean() - adapter2['tokens'].mean()
         ).item()
         
-        # Quantum resonance variance
-        resonance_diff = np.abs(
-            np.mean(adapter1.get('quantum_resonance', [0])) - 
-            np.mean(adapter2.get('quantum_resonance', [0]))
-        )
+        # Quantum resonance variance using PyTorch
+        resonance_diff = torch.abs(
+            torch.mean(torch.tensor(adapter1.get('quantum_resonance', [0.0]))) - 
+            torch.mean(torch.tensor(adapter2.get('quantum_resonance', [0.0])))
+        ).item()
         
         # Consciousness flow divergence
         flow_divergence = self._compute_flow_divergence(
