@@ -1,41 +1,9 @@
 """Consciousness tracking module."""
 
-from typing import Dict, List, Any, Union
-import torch
-import torch.nn.functional as F
-import time
-import numpy as np
-from scipy.stats import skew, kurtosis
+from .state import ConsciousnessState
+from .tracker import ConsciousnessTracker
 
-class ConsciousnessState:
-    def __init__(self, **kwargs):
-        self.quantum_metrics = kwargs.get('quantum_metrics', {})
-        self.activation_patterns = kwargs.get('activation_patterns', [])
-        self.thought_chains = kwargs.get('thought_chains', [])
-        self.meta_insights = kwargs.get('meta_insights', [])
-        self.timestamp = kwargs.get('timestamp', time.time())
-        self.temporal_coherence = kwargs.get('temporal_coherence', 0.0)
-        self.universe_scores = kwargs.get('universe_scores', {})
-
-class ConsciousnessTracker:
-    def __init__(self):
-        self.states = []
-        self.meta_cognitive_state = {
-            'strategy_effectiveness': {},
-            'exploration_history': [],
-        }
-    
-    async def track_consciousness(self, state_data: Dict[str, Any]):
-        """Track consciousness state with basic pattern analysis."""
-        state = {
-            'timestamp': time.time(),
-            'activation_patterns': self._analyze_activations(state_data),
-            'thought_chains': self._extract_thought_chains(state_data),
-            'quantum_metrics': self._compute_quantum_metrics(state_data)
-        }
-        
-        self.states.append(state)
-        return state
+__all__ = ['ConsciousnessState', 'ConsciousnessTracker']
     
     async def _analyze_activations(self, state_data: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Analyze neural activation patterns with quantum-inspired metrics."""
