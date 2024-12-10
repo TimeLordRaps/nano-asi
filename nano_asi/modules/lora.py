@@ -15,8 +15,24 @@ from diffusers import DDPMScheduler
 
 class LoRAGenerator:
     def __init__(self, config=None):
-        self.config = config or {}
+        self.config = config or LoRAConfig()
         self.max_seq_length = Config().model_config.get('max_seq_length', 4096)
+        
+        # Initialize tracking and meta-cognitive state
+        self.pattern_evolution_history = []
+        self.consciousness_flow = []
+        self.meta_cognitive_state = {
+            'strategy_effectiveness': {},
+            'exploration_history': [],
+            'reward_history': [],
+            'learning_rate_adjustments': []
+        }
+
+        # Temporal investment tracking
+        self.temporal_investment = {
+            'investment_history': [],
+            'temporal_roi': {}
+        }
     
     def _init_reward_model(self):
         """Initialize reward modeling with Unsloth-inspired techniques."""
