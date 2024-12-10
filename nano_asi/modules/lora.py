@@ -22,8 +22,8 @@ class LoRAGenerator:
         return {
             'loss_type': 'dpo',  # Direct Preference Optimization
             'beta': self.config.learning_rate,
-            'max_length': MAX_SEQ_LENGTH,
-            'max_prompt_length': MAX_SEQ_LENGTH // 2,
+            'max_length': self.max_seq_length,
+            'max_prompt_length': self.max_seq_length // 2,
             'gradient_accumulation_steps': self.config.gradient_accumulation_steps,
             'weight_decay': self.config.weight_decay
         }
