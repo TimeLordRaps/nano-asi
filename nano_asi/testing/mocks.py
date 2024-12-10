@@ -53,4 +53,6 @@ class MockModel(nn.Module):
             return 2048
         elif name == 'config':
             return self.config
+        elif name == 'max_position_embeddings':
+            return self.config.max_position_embeddings
         raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")

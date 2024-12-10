@@ -66,7 +66,7 @@ class LoRAGenerator:
         if len(conditional_tokens) == 0:
             raise ValueError("Conditional tokens cannot be empty")
         
-        # Modify MockModel to include max_seq_length
+        # Modify MockModel to include max_seq_length and config
         class MockModel(torch.nn.Module):
             def __init__(self):
                 super().__init__()
@@ -75,9 +75,28 @@ class LoRAGenerator:
                     torch.nn.Linear(512, 512) for _ in range(4)
                 ])
                 self.max_seq_length = 2048  # Explicitly set max_seq_length
+                
+                # Add config attribute with necessary properties
+                self.config = type('MockConfig', (), {
+                    'max_position_embeddings': 2048,
+                    'update': lambda x: None,
+                    'unsloth_version': '2024.12.4'
+                })()
             
             def get_input_embeddings(self):
                 return self.embed_tokens
+            
+            def __getattr__(self, name):
+                """
+                Ensure max_seq_length and config are always accessible
+                """
+                if name == 'max_seq_length':
+                    return 2048
+                elif name == 'config':
+                    return self.config
+                elif name == 'max_position_embeddings':
+                    return self.config.max_position_embeddings
+                raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
 
         # Load model with LoRA configuration
         try:
