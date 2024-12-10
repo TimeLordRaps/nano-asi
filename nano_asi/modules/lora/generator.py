@@ -90,6 +90,12 @@ class LoRAGenerator:
         except Exception as e:
             print(f"Model loading failed: {e}")
             # Fallback to a mock model
+            class MockTokenizer:
+                def __init__(self):
+                    self.pad_token = '<pad>'
+                    self.eos_token = '</s>'
+                    self.bos_token = '<s>'
+
             model = MockModel()
             tokenizer = MockTokenizer()
 
