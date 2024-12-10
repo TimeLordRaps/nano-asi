@@ -457,7 +457,7 @@ class TestAdvancedLoRADiffusionFramework:
         # Mock trained model (in real scenario, this would be an actual model)
         training_state['trained_model'] = {
             'model_id': str(uuid.uuid4()),
-            'base_loras': [lora['tokens'].tobytes() for lora in top_loras]
+            'base_loras': [lora['tokens'].numpy().tobytes() for lora in top_loras]
         }
         
         return training_state
