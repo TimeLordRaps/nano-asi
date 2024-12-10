@@ -9,6 +9,7 @@ import time
 import numpy as np
 from unsloth import FastLanguageModel
 from nano_asi.core.config import Config
+from nano_asi.modules.lora.config import LoRAConfig
 from diffusers import DDPMScheduler
 
 
