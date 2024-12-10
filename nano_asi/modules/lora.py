@@ -14,20 +14,56 @@ from diffusers import DDPMScheduler
 
 
 class LoRAGenerator:
-    def __init__(self, config=None):
-        self.config = config or LoRAConfig()
-        self.max_seq_length = Config().model_config.get('max_seq_length', 4096)
+    """
+    Advanced LoRA Adapter Generator with Multi-Dimensional Optimization
+    
+    Features:
+    - Quantum-inspired generation
+    - Consciousness tracking
+    - Adaptive hyperparameter optimization
+    - Comprehensive error handling
+    """
+    
+    def __init__(
+        self, 
+        config: Optional[LoRAConfig] = None,
+        consciousness_tracker: Optional[ConsciousnessTracker] = None,
+        evaluation_suite: Optional[EvaluationSuite] = None
+    ):
+        """
+        Initialize LoRA generator with advanced configuration and tracking.
         
-        # Initialize tracking and meta-cognitive state
-        self.pattern_evolution_history = []
-        self.consciousness_flow = []
+        Args:
+            config: Custom LoRA configuration
+            consciousness_tracker: Optional consciousness tracking system
+            evaluation_suite: Optional model evaluation suite
+        """
+        self.config = config or LoRAConfig()
+        self.consciousness_tracker = consciousness_tracker or ConsciousnessTracker()
+        self.evaluation_suite = evaluation_suite or EvaluationSuite()
+        
+        # Enhanced hyperparameter management
+        self.hyperparameters = {
+            'lora_r': self.config.lora_r,
+            'lora_alpha': self.config.lora_alpha,
+            'lora_dropout': self.config.lora_dropout,
+            'target_modules': self.config.target_modules
+        }
+        
+        # Advanced tracking systems
         self.meta_cognitive_state = {
             'strategy_effectiveness': {},
             'exploration_history': [],
-            'reward_history': [],
-            'learning_rate_adjustments': []
+            'quantum_resonance_log': [],
+            'adaptation_metrics': {}
         }
-
+        
+        # Model configuration
+        self.base_model_name = Config().get('model_name', 'unsloth/Qwen2.5-Coder-0.5B-Instruct-bnb-4bit')
+        
+        # Logging configuration
+        self.logger = logging.getLogger(self.__class__.__name__)
+        
         # Temporal investment tracking
         self.temporal_investment = {
             'investment_history': [],

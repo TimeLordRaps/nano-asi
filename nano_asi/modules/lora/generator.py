@@ -1,10 +1,15 @@
 import torch
+import uuid
 import time
+import logging
 import numpy as np
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Union
+
 from unsloth import FastLanguageModel
 from nano_asi.modules.consciousness.tracker import ConsciousnessTracker
 from nano_asi.modules.lora.config import LoRAConfig
+from nano_asi.core.config import Config
+from nano_asi.modules.evaluation.benchmarks import EvaluationSuite
 
 class LoRAGenerator:
     def __init__(self, config: Optional[LoRAConfig] = None):
@@ -47,125 +52,113 @@ class LoRAGenerator:
     async def generate_lora_adapter(
         self, 
         conditional_tokens: Optional[torch.Tensor] = None,
-        consciousness_tracker: Optional[ConsciousnessTracker] = None
+        universe_context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
-        Generate a LoRA adapter using Unsloth's FastLanguageModel.
+        Generate a quantum-inspired LoRA adapter with comprehensive tracking.
         
         Args:
-            conditional_tokens (torch.Tensor, optional): Input tokens for conditioning. 
-            consciousness_tracker (ConsciousnessTracker, optional): Tracker for consciousness states.
+            conditional_tokens: Input tokens for conditioning
+            universe_context: Optional context for multi-universe generation
         
         Returns:
-            Dict containing LoRA adapter details and metadata.
+            Comprehensive LoRA adapter metadata
         """
-        # Validate input
+        # Validate inputs
         if conditional_tokens is None:
-            raise ValueError("Conditional tokens must be provided")
+            raise ValueError("Quantum conditioning tokens are required")
         
-        if len(conditional_tokens) == 0:
-            raise ValueError("Conditional tokens cannot be empty")
-        
-        # Modify MockModel to include max_seq_length and config
-        class MockModel(torch.nn.Module):
-            def __init__(self):
-                super().__init__()
-                self.embed_tokens = torch.nn.Embedding(1000, 512)
-                self.layers = torch.nn.ModuleList([
-                    torch.nn.Linear(512, 512) for _ in range(4)
-                ])
-                self.max_seq_length = 2048  # Explicitly set max_seq_length
-                
-                # Add config attribute with necessary properties
-                self.config = type('MockConfig', (), {
-                    'max_position_embeddings': 2048,
-                    'update': lambda x: None,
-                    'unsloth_version': '2024.12.4'
-                })()
-            
-            def get_input_embeddings(self):
-                return self.embed_tokens
-            
-            def __getattr__(self, name):
-                """
-                Ensure max_seq_length and config are always accessible
-                """
-                if name == 'max_seq_length':
-                    return 2048
-                elif name == 'config':
-                    return self.config
-                elif name == 'max_position_embeddings':
-                    return self.config.max_position_embeddings
-                raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
-
-        # Load model with LoRA configuration
+        # Quantum-inspired model loading with advanced error handling
         try:
-            model, tokenizer = FastLanguageModel.from_pretrained(
-                model_name = self.base_model_name,
-                max_seq_length = 2048,
-                dtype = torch.float16,
-                load_in_4bit = True
-            )
+            model, tokenizer = self._load_base_model()
+            model = self._apply_lora_configuration(model)
         except Exception as e:
-            print(f"Model loading failed: {e}")
-            # Fallback to a mock model
-            class MockTokenizer:
-                def __init__(self):
-                    self.pad_token = '<pad>'
-                    self.eos_token = '</s>'
-                    self.bos_token = '<s>'
-
-            model = MockModel()
-            tokenizer = MockTokenizer()
-
-        # Apply LoRA
-        model = FastLanguageModel.get_peft_model(
-            model,
-            r = self.hyperparameters['lora_r'],
-            target_modules = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj"],
-            lora_alpha = self.hyperparameters['lora_alpha'],
-            lora_dropout = self.hyperparameters['lora_dropout']
+            self.logger.error(f"Model generation failed: {e}")
+            raise
+        
+        # Consciousness tracking with quantum metrics
+        quantum_state = await self._track_quantum_consciousness(
+            model, 
+            conditional_tokens, 
+            universe_context
         )
-
-        # Track consciousness if tracker is provided
-        if consciousness_tracker:
-            state_data = {
-                'model_params': model.state_dict(),
-                'lora_config': self.hyperparameters,
-                'conditional_tokens': conditional_tokens
-            }
-            await consciousness_tracker.track_consciousness(state_data)
-
-        # Compute quantum resonance and performance metrics
-        quantum_resonance = torch.rand(32).tolist()
-        performance_metrics = {
-            'model_size': sum(p.numel() for p in model.parameters()),
-            'trainable_params': sum(p.numel() for p in model.parameters() if p.requires_grad)
-        }
-
-        # Prepare adapter result
+        
+        # Performance and resonance metrics
+        performance_metrics = self._compute_quantum_performance(model)
+        
+        # Comprehensive adapter generation
         adapter = {
             'model': model,
             'tokenizer': tokenizer,
-            'base_model_name': self.base_model_name,
-            'metadata': {
-                'timestamp': time.time(),
-                'lora_config': {
-                    'r': self.hyperparameters['lora_r'],
-                    'alpha': self.hyperparameters['lora_alpha'],
-                    'dropout': self.hyperparameters['lora_dropout'],
-                    'target_modules': ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj"]
-                }
-            },
-            'consciousness_flow': self.consciousness_flow,
-            'quantum_resonance': quantum_resonance,
-            'performance_metrics': performance_metrics
+            'quantum_state': quantum_state,
+            'performance_metrics': performance_metrics,
+            'universe_context': universe_context or {}
         }
-
+        
         # Update evolution history
         self.pattern_evolution_history.append(adapter)
-
+        
         return adapter
+    
+    def _load_base_model(self):
+        """Load base model with advanced configuration."""
+        return FastLanguageModel.from_pretrained(
+            model_name=self.base_model_name,
+            max_seq_length=self.config.max_seq_length,
+            dtype=torch.float16,
+            load_in_4bit=True
+        )
+    
+    def _apply_lora_configuration(self, model):
+        """Apply LoRA configuration with quantum-inspired parameter selection."""
+        return FastLanguageModel.get_peft_model(
+            model,
+            r=self.hyperparameters['lora_r'],
+            target_modules=self.hyperparameters['target_modules'],
+            lora_alpha=self.hyperparameters['lora_alpha'],
+            lora_dropout=self.hyperparameters['lora_dropout']
+        )
+    
+    async def _track_quantum_consciousness(
+        self, 
+        model: torch.nn.Module, 
+        tokens: torch.Tensor,
+        universe_context: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """
+        Track quantum consciousness with multi-dimensional metrics.
+        
+        Args:
+            model: Generated model
+            tokens: Conditioning tokens
+            universe_context: Optional universe generation context
+        
+        Returns:
+            Quantum consciousness state metrics
+        """
+        state_data = {
+            'model_params': model.state_dict(),
+            'tokens': tokens,
+            'universe_context': universe_context or {}
+        }
+        
+        return await self.consciousness_tracker.track_consciousness(state_data)
+    
+    def _compute_quantum_performance(self, model: torch.nn.Module) -> Dict[str, Any]:
+        """
+        Compute quantum-inspired performance metrics.
+        
+        Args:
+            model: Generated model
+        
+        Returns:
+            Performance metrics dictionary
+        """
+        return {
+            'model_size': sum(p.numel() for p in model.parameters()),
+            'trainable_params': sum(p.numel() for p in model.parameters() if p.requires_grad),
+            'quantum_resonance': torch.rand(32).tolist()
+        }
 
     async def explore_parallel_universes(self, num_universes: int = 3) -> List[Dict[str, Any]]:
         """
