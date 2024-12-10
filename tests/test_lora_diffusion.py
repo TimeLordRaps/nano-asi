@@ -97,10 +97,15 @@ class TestLoRADiffusionFramework:
                     round_winners.append(comparison_result['winner'])
             
             # Update winners list with unique winners and scores
-            for winner in round_winners:
-                if not any(torch.equal(winner['tokens'], existing['tokens']) for existing in winners):
-                    winner['score'] = comparison['scores']['adapter1' if winner == adapter1 else 'adapter2']
-                    winners.append(winner)
+            for i in range(0, len(adapters), 2):
+                if i + 1 < len(adapters):
+                    # Compare adapters and store result
+                    comparison = await self._compare_adapters(adapters[i], adapters[i+1])
+                    winner = comparison['winner']
+                    # Add winner if unique
+                    if not any(torch.equal(winner['tokens'], existing['tokens']) for existing in winners):
+                        winner['score'] = comparison['scores']['adapter1' if winner == adapters[i] else 'adapter2']
+                        winners.append(winner)
         
         return {
             'winners': winners,
