@@ -4,28 +4,6 @@ from .state import ConsciousnessState
 from .tracker import ConsciousnessTracker
 
 __all__ = ['ConsciousnessState', 'ConsciousnessTracker']
-            for activation in state_data['activations']:
-                # Enhanced pattern analysis with quantum properties
-                quantum_stats = self._compute_quantum_stats(activation)
-                
-                # Ensure values exist, use gradients as fallback
-                values = activation.get('values', activation.get('gradients', []))
-                
-                # Compute metrics safely
-                coherence = self._compute_quantum_coherence(values) if len(values) > 0 else 0.0
-                entanglement = self._compute_entanglement(values) if len(values) > 0 else 0.0
-                
-                pattern = {
-                    'layer_type': activation.get('layer_type'),
-                    'activation_stats': self._compute_activation_stats(activation),
-                    'pattern_type': self._classify_pattern(activation),
-                    'quantum_stats': quantum_stats,
-                    'coherence': coherence,
-                    'entanglement': entanglement,
-                    'resonance_score': self._compute_resonance(activation)
-                }
-                patterns.append(pattern)
-        return patterns
     
     async def _extract_thought_chains(self, state_data: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Extract and analyze thought chains."""
